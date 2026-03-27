@@ -1,245 +1,150 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import { useStudent } from '@/context/student-context'
 
-interface StudentProfile {
-  name: string
-  className: string
-  studentId: string
-  email: string
-  phone: string
-  gpa: string
-}
-
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
   const router = useRouter()
-  const { studentInfo, clearStudentInfo } = useStudent()
+  const { studentInfo, clearStudentInfo, quizResult, hasCompletedQuiz } = useStudent()
 
-  // Redirect nếu chưa nhập thông tin
   useEffect(() => {
     if (!studentInfo) {
       router.push('/')
     }
   }, [studentInfo, router])
 
-  const [profile, setProfile] = useState<StudentProfile>({
-    name: studentInfo?.name || 'Nguyễn Văn A',
-    className: studentInfo?.className || '10A1',
-    studentId: 'HS001234',
-    email: 'student@example.com',
-    phone: '0912345678',
-    gpa: '8.5',
-  })
-
-  const [editData, setEditData] = useState<StudentProfile>(profile)
-
-  const handleEdit = () => {
-    setIsEditing(true)
-    setEditData(profile)
-  }
-
-  const handleSave = () => {
-    setProfile(editData)
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setIsEditing(false)
-  }
-
-  const handleChange = (field: keyof StudentProfile, value: string) => {
-    setEditData({ ...editData, [field]: value })
+  if (!studentInfo) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 text-center mb-12">👤 Hồ sơ Học sinh</h1>
-
-        <Card className="p-8 shadow-lg mb-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">Thông tin cá nhân</h2>
-            {!isEditing && (
-              <Button
-                onClick={handleEdit}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
-              >
-                Chỉnh sửa
-              </Button>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header with decorative elements */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg mb-4">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Hồ sơ Học sinh
+          </h1>
+        </div>
 
-          {isEditing ? (
-            <div className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Họ và tên
-                  </label>
-                  <Input
-                    type="text"
-                    value={editData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+        {/* Student Info Card */}
+        <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
+          <div className="space-y-6">
+            {/* Name */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-600 mb-1">Họ và tên</p>
+                <p className="text-xl font-bold text-gray-800">{studentInfo.name}</p>
+              </div>
+            </div>
+
+            {/* Class */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-emerald-600 mb-1">Lớp</p>
+                <p className="text-xl font-bold text-gray-800">{studentInfo.className}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Quiz Result Card */}
+        <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Kết quả Trắc nghiệm</h2>
+          </div>
+          
+          {hasCompletedQuiz && quizResult ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-center">
+                  <p className="text-sm opacity-90 mb-1">Số câu đúng</p>
+                  <p className="text-3xl font-bold">{quizResult.score}/{quizResult.totalQuestions}</p>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Lớp
-                  </label>
-                  <Input
-                    type="text"
-                    value={editData.className}
-                    onChange={(e) => handleChange('className', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mã học sinh
-                  </label>
-                  <Input
-                    type="text"
-                    value={editData.studentId}
-                    onChange={(e) => handleChange('studentId', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    value={editData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Số điện thoại
-                  </label>
-                  <Input
-                    type="tel"
-                    value={editData.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Điểm GPA
-                  </label>
-                  <Input
-                    type="text"
-                    value={editData.gpa}
-                    onChange={(e) => handleChange('gpa', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className={`p-4 rounded-xl text-white text-center ${
+                  (quizResult.score / quizResult.totalQuestions) * 100 >= 80 
+                    ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
+                    : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600' 
+                    : 'bg-gradient-to-br from-red-500 to-rose-600'
+                }`}>
+                  <p className="text-sm opacity-90 mb-1">Điểm số</p>
+                  <p className="text-3xl font-bold">
+                    {((quizResult.score / quizResult.totalQuestions) * 10).toFixed(1)}
+                  </p>
                 </div>
               </div>
-
-              <div className="flex gap-4">
-                <Button
-                  onClick={handleSave}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition-colors duration-200"
-                >
-                  Lưu
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 rounded-lg transition-colors duration-200"
-                >
-                  Hủy
-                </Button>
+              
+              <div className={`p-4 rounded-xl text-center ${
+                (quizResult.score / quizResult.totalQuestions) * 100 >= 80 
+                  ? 'bg-emerald-50 border-2 border-emerald-200' 
+                  : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
+                  ? 'bg-amber-50 border-2 border-amber-200' 
+                  : 'bg-red-50 border-2 border-red-200'
+              }`}>
+                <p className={`text-lg font-semibold ${
+                  (quizResult.score / quizResult.totalQuestions) * 100 >= 80 ? 'text-emerald-700' :
+                  (quizResult.score / quizResult.totalQuestions) * 100 >= 50 ? 'text-amber-700' : 'text-red-700'
+                }`}>
+                  {(quizResult.score / quizResult.totalQuestions) * 100 >= 80 
+                    ? 'Xuất sắc! Bạn đã nắm vững kiến thức.' 
+                    : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
+                    ? 'Khá tốt! Hãy tiếp tục ôn tập thêm.' 
+                    : 'Cần cố gắng thêm! Hãy xem lại phần ôn tập.'}
+                </p>
               </div>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Họ và tên</p>
-                  <p className="text-lg font-semibold text-gray-800">{profile.name}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Lớp</p>
-                  <p className="text-lg font-semibold text-gray-800">{profile.className}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Mã học sinh</p>
-                  <p className="text-lg font-semibold text-gray-800">{profile.studentId}</p>
-                </div>
+            <div className="text-center py-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Email</p>
-                  <p className="text-lg font-semibold text-gray-800">{profile.email}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Số điện thoại</p>
-                  <p className="text-lg font-semibold text-gray-800">{profile.phone}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Điểm GPA</p>
-                  <p className="text-lg font-semibold text-blue-600">{profile.gpa}/10</p>
-                </div>
-              </div>
+              <p className="text-gray-600 font-medium mb-1">Bạn chưa làm bài trắc nghiệm</p>
+              <p className="text-sm text-gray-500">Hãy vào phần Ôn tập để xem nội dung, sau đó làm bài Trắc nghiệm.</p>
             </div>
           )}
         </Card>
 
-        {/* Reset Button */}
-        <div className="mt-8 text-center">
+        {/* Logout Button */}
+        <div className="text-center">
           <Button
             onClick={() => {
               clearStudentInfo()
               router.push('/')
             }}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200"
+            className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
           >
-            Nhập lại thông tin
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Đăng xuất
           </Button>
         </div>
-
-        {/* Statistics Card */}
-        <Card className="p-8 shadow-lg mt-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Thống kê Học tập</h2>
-          <div className="grid md:grid-cols-4 gap-4">
-            <div className="bg-blue-100 p-6 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-2">Bài tập hoàn thành</p>
-              <p className="text-3xl font-bold text-blue-600">24</p>
-            </div>
-            <div className="bg-green-100 p-6 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-2">Điểm cao nhất</p>
-              <p className="text-3xl font-bold text-green-600">9.5</p>
-            </div>
-            <div className="bg-yellow-100 p-6 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-2">Lần làm trắc nghiệm</p>
-              <p className="text-3xl font-bold text-yellow-600">12</p>
-            </div>
-            <div className="bg-purple-100 p-6 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-2">Xếp hạng lớp</p>
-              <p className="text-3xl font-bold text-purple-600">5</p>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   )
