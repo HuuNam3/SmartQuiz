@@ -392,7 +392,7 @@ export default function QuizPage() {
             <div className="lg:col-span-1 order-2 lg:order-1">
               <Card className="p-4 shadow-lg sticky top-4">
                 <h3 className="font-semibold text-gray-700 mb-4 text-center">Danh sách câu hỏi</h3>
-                <div className="grid grid-cols-5 gap-2 mb-4">
+                <div className="grid grid-cols-4 gap-4 mb-4">
                   {quizzes.map((_, index) => (
                     <button
                       key={index}
