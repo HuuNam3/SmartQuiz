@@ -1,43 +1,85 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { useStudent } from '@/context/student-context'
-import ConfirmationModal from '@/components/confirmation-modal'
+// import ConfirmationModal from '@/components/confirmation-modal'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+
+type user = {
+  name: string,
+  className: string,
+  score: number,
+  startTime: number,
+  updatedAt: string,
+}
 
 export default function Home() {
   const [name, setName] = useState('')
   const [className, setClassName] = useState('')
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showQuizWarning, setShowQuizWarning] = useState(false)
+  const [showCompletedWarning, setShowCompletedWarning] = useState(false)
   const [showProfileWarning, setShowProfileWarning] = useState(false)
+  const [users, setUsers] = useState<user[]>([]);
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const { studentInfo, setStudentInfo, isAdmin, allStudentRecords, clearStudentInfo } = useStudent()
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch("/api/users");
+        const data = await response.json();
+        setUsers(data);
+        console.log(data)
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   const exportToExcel = () => {
-    if (allStudentRecords.length === 0) {
+    if (users.length === 0) {
       alert('Chưa có học sinh nào làm bài!')
       return
     }
-    
+
     // Create CSV content
     const headers = ['STT', 'Họ và tên', 'Lớp', 'Điểm', 'Ngày làm bài']
-    const rows = allStudentRecords.map((record, index) => [
-      index + 1,
-      record.name,
-      record.className,
-      `${record.score}/${record.totalQuestions}`,
-      record.completedAt.toLocaleDateString('vi-VN')
-    ])
-    
+    const rows = users.map((record, index) => {
+      const coverDate = record.updatedAt.slice(0, 10);
+
+      return [
+        index + 1,
+        record.name,
+        record.className,
+        record.score,
+        coverDate
+      ]
+    })
+
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.join(','))
     ].join('\n')
-    
+
     // Add BOM for UTF-8 encoding
     const BOM = '\uFEFF'
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -57,6 +99,12 @@ export default function Home() {
       // Hiển thị modal xác nhận thay vì redirect ngay
       setShowConfirmation(true)
     }
+
+    setStudentInfo({
+      name,
+      className,
+    })
+    setShowConfirmation(false)
   }
 
   const handleConfirm = () => {
@@ -73,23 +121,60 @@ export default function Home() {
   }
 
   const handleQuizClick = () => {
-    if (!studentInfo) return
-    setShowQuizWarning(true)
+    if (!studentInfo || !users) return
+
+    const existingUser = users.find(
+      (u) =>
+        u.name === studentInfo.name &&
+        u.className === studentInfo.className
+    )
+
+    if (existingUser) {
+      const endTime =
+        existingUser?.startTime + 15 * 60 * 1000;
+
+      const remainingSeconds = Math.floor(
+        (endTime - Date.now()) / 1000
+      )
+
+      console.log(remainingSeconds)
+
+      if (remainingSeconds < 0) {
+        setShowCompletedWarning(true)
+      } else {
+        setShowQuizWarning(true)
+      }
+
+    }
   }
 
   const handleProfileClick = () => {
     if (!studentInfo) return
-    setShowProfileWarning(true)
+    router.push('/profile')
   }
 
-  const handleQuizConfirm = () => {
-    setShowQuizWarning(false)
-    const quizStartTime = Date.now()
-    setStudentInfo({
-      ...studentInfo!,
-      quizStartTime,
-    })
-    router.push('/quiz')
+  const handleConfirmQuiz = async () => {
+    try {
+      await fetch(`/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...studentInfo!,
+          // name: "nam1",
+          // class: "11a11",
+          startTime: Date.now(),
+          score: 0,
+          updatedAt: new Date(),
+        }),
+      });
+      setShowQuizWarning(false)
+      router.push('/quiz')
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+    }
+
   }
 
   const handleProfileConfirm = () => {
@@ -99,41 +184,68 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
-      {showConfirmation && (
+      {/* {showConfirmation && (
         <ConfirmationModal
           studentName={name}
           studentClass={className}
           onConfirm={handleConfirm}
           onEdit={handleEdit}
         />
-      )}
+      )} */}
 
       {showQuizWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <Card className="p-8 max-w-md shadow-2xl bg-white">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Xác nhận vào Trắc nghiệm</h2>
-            <p className="text-gray-600 mb-2">Học sinh: <span className="font-semibold">{studentInfo?.name}</span></p>
-            <p className="text-gray-600 mb-6">Lớp: <span className="font-semibold">{studentInfo?.className}</span></p>
-            <p className="text-gray-700 mb-6">Bạn có muốn vào làm bài trắc nghiệm? Thời gian làm bài là 15 phút.</p>
-            <div className="flex gap-4">
-              <Button
-                onClick={() => setShowQuizWarning(false)}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
-              >
-                Hủy
-              </Button>
-              <Button
-                onClick={handleQuizConfirm}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-              >
-                Vào làm bài
-              </Button>
+        <AlertDialog open={showQuizWarning} onOpenChange={setShowQuizWarning}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl text-amber-600">Lưu ý quan trọng!</AlertDialogTitle>
+              <AlertDialogDescription className="sr-only">
+                Thông tin về bài trắc nghiệm trước khi bắt đầu làm bài
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="text-base space-y-2 text-muted-foreground">
+              <span className="block font-semibold text-gray-800">Bạn sắp vào phần Trắc nghiệm:</span>
+              <ul className="list-disc list-inside text-gray-600 space-y-1">
+                <li>Bài trắc nghiệm gồm <strong>10 câu hỏi</strong></li>
+                <li>Thời gian làm bài: <strong>15 phút</strong></li>
+                <li>Bạn có thể chọn đáp án cho tất cả các câu trước khi nộp bài</li>
+                <li>Sau khi nộp bài, bạn không thể sửa lại đáp án</li>
+              </ul>
+              <span className="block text-amber-600 font-medium mt-3">Bạn có chắc chắn muốn bắt đầu?</span>
             </div>
-          </Card>
-        </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmQuiz} className="bg-blue-600 hover:bg-blue-700">
+                Bắt đầu làm bài
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
-      {showProfileWarning && (
+      {showCompletedWarning && (
+        <AlertDialog open={showCompletedWarning} onOpenChange={setShowCompletedWarning}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl text-red-600">Bạn đã hoàn thành bài trắc nghiệm!</AlertDialogTitle>
+              <AlertDialogDescription className="sr-only">
+                Thông báo về việc đã hoàn thành bài trắc nghiệm
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="text-base space-y-2 text-muted-foreground">
+              <span className="block text-gray-700">Mỗi học sinh chỉ được làm bài trắc nghiệm <strong>1 lần</strong>.</span>
+              <span className="block text-gray-600">Bạn đã hoàn thành bài làm của mình. Vui lòng xem kết quả trong phần Hồ sơ học sinh.</span>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Đóng</AlertDialogCancel>
+              <AlertDialogAction onClick={() => { setShowCompletedWarning(false); router.push('/profile') }} className="bg-blue-600 hover:bg-blue-700">
+                Xem hồ sơ
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* {showProfileWarning && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <Card className="p-8 max-w-md shadow-2xl bg-white">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Xem Hồ sơ Học sinh</h2>
@@ -156,7 +268,7 @@ export default function Home() {
             </div>
           </Card>
         </div>
-      )}
+      )} */}
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -223,11 +335,10 @@ export default function Home() {
           ) : (
             <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0">
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  isAdmin 
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-600' 
-                    : 'bg-gradient-to-br from-emerald-500 to-teal-600'
-                }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isAdmin
+                  ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                  : 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                  }`}>
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {isAdmin ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -240,7 +351,7 @@ export default function Home() {
                   {isAdmin ? 'Quản trị viên' : 'Xin chào!'}
                 </h2>
               </div>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +368,7 @@ export default function Home() {
                   <span className="font-semibold text-gray-800 ml-auto">{studentInfo.className}</span>
                 </div>
               </div>
-              
+
               {isAdmin && (
                 <div className="space-y-4 mb-6">
                   <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
@@ -267,7 +378,7 @@ export default function Home() {
                       </svg>
                       <p className="text-amber-800 font-semibold">Chế độ Quản trị viên</p>
                     </div>
-                    <p className="text-amber-700 text-sm">Số học sinh đã làm bài: <strong className="text-lg">{allStudentRecords.length}</strong></p>
+                    <p className="text-amber-700 text-sm">Số học sinh đã làm bài: <strong className="text-lg">{users.length}</strong></p>
                   </div>
                   <Button
                     onClick={exportToExcel}
@@ -299,15 +410,13 @@ export default function Home() {
             <button
               onClick={handleQuizClick}
               disabled={!studentInfo}
-              className={`w-full text-left transition-all duration-300 ${
-                studentInfo
-                  ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
-                  : 'cursor-not-allowed opacity-60'
-              }`}
+              className={`w-full text-left transition-all duration-300 ${studentInfo
+                ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
+                : 'cursor-not-allowed opacity-60'
+                }`}
             >
-              <Card className={`p-6 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 shadow-xl border-0 ${
-                studentInfo ? 'ring-2 ring-amber-200' : ''
-              }`}>
+              <Card className={`p-6 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 shadow-xl border-0 ${studentInfo ? 'ring-2 ring-amber-200' : ''
+                }`}>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,15 +444,13 @@ export default function Home() {
             <button
               onClick={handleProfileClick}
               disabled={!studentInfo}
-              className={`w-full text-left transition-all duration-300 ${
-                studentInfo
-                  ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
-                  : 'cursor-not-allowed opacity-60'
-              }`}
+              className={`w-full text-left transition-all duration-300 ${studentInfo
+                ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
+                : 'cursor-not-allowed opacity-60'
+                }`}
             >
-              <Card className={`p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 shadow-xl border-0 ${
-                studentInfo ? 'ring-2 ring-purple-200' : ''
-              }`}>
+              <Card className={`p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 shadow-xl border-0 ${studentInfo ? 'ring-2 ring-purple-200' : ''
+                }`}>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

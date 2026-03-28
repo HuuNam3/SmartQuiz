@@ -17,6 +17,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
+type user = {
+  name: string,
+  className: string,
+  score: number,
+  startTime: number,
+  updatedAt: string,
+}
+
 // Ngân hàng 20 câu hỏi
 const allQuestions = [
   {
@@ -142,14 +150,14 @@ const allQuestions = [
 ]
 
 const QUIZ_COUNT = 10
-const QUIZ_DURATION = 15 * 60 // 15 phút tính bằng giây
+const QUIZ_DURATION = 15 * 60 * 1000 // 15 phút tính bằng giây
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
 }
@@ -158,7 +166,7 @@ export default function QuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<(number | null)[]>(Array(QUIZ_COUNT).fill(null))
   const [showScore, setShowScore] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION)
+  const [timeLeft, setTimeLeft] = useState<number>()
   const [isTimeUp, setIsTimeUp] = useState(false)
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
@@ -169,6 +177,43 @@ export default function QuizPage() {
   const quizzes = useMemo(() => {
     return shuffleArray(allQuestions).slice(0, QUIZ_COUNT)
   }, [])
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch("/api/users");
+        const data = await response.json();
+
+        const foundUser = data.find(
+          (u: user) =>
+            u.name === studentInfo?.name &&
+            u.className === studentInfo?.className
+        );
+
+        if (foundUser?.startTime) {
+          const endTime =
+            foundUser.startTime + QUIZ_DURATION;
+
+          const remainingSeconds = Math.floor(
+            (endTime - Date.now()) / 1000
+          );
+
+          setTimeLeft(
+            remainingSeconds > 0
+              ? remainingSeconds
+              : 0
+          );
+        } else {
+          setTimeLeft(QUIZ_DURATION / 1000);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -225,29 +270,43 @@ export default function QuizPage() {
     setShowSubmitConfirm(true)
   }
 
-  const handleConfirmSubmit = () => {
-    const finalScore = calculateScore()
-    const completedAt = new Date()
-    
-    setQuizResult({
-      score: finalScore,
-      totalQuestions: quizzes.length,
-      completedAt
-    })
-    
-    // Save to all student records (only for non-admin users)
-    if (studentInfo && !isAdmin) {
-      addStudentRecord({
-        name: studentInfo.name,
-        className: studentInfo.className,
+  const handleConfirmSubmit = async () => {
+    try {
+      const finalScore = calculateScore()
+      await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: studentInfo?.name,
+          className: studentInfo?.className,
+          score: finalScore,
+        }),
+      });
+      const completedAt = new Date()
+      setQuizResult({
         score: finalScore,
         totalQuestions: quizzes.length,
         completedAt
       })
+
+      // Save to all student records (only for non-admin users)
+      if (studentInfo && !isAdmin) {
+        addStudentRecord({
+          name: studentInfo.name,
+          className: studentInfo.className,
+          score: finalScore,
+          totalQuestions: quizzes.length,
+          completedAt
+        })
+      }
+
+      setShowSubmitConfirm(false)
+      setShowScore(true)
+    } catch (error) {
+      console.error("Failed to save user:", error);
     }
-    
-    setShowSubmitConfirm(false)
-    setShowScore(true)
   }
 
   const calculateScore = () => {
@@ -294,23 +353,23 @@ export default function QuizPage() {
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Bạn đã hoàn thành bài trắc nghiệm!</h2>
               <p className="text-gray-600">Mỗi học sinh chỉ được làm bài 1 lần.</p>
             </div>
-            
+
             <div className="p-6 bg-gray-50 rounded-lg mb-6">
               <p className="text-lg text-gray-600 mb-2">Kết quả của bạn:</p>
               <div className={cn(
                 "text-5xl font-bold mb-2",
                 resultPercentage >= 80 ? "text-green-600" :
-                resultPercentage >= 50 ? "text-amber-600" : "text-red-600"
+                  resultPercentage >= 50 ? "text-amber-600" : "text-red-600"
               )}>
                 {quizResult.score}/{quizResult.totalQuestions}
               </div>
               <div className={cn(
                 "inline-block px-4 py-2 rounded-full text-sm font-semibold",
                 resultPercentage >= 80 ? "bg-green-100 text-green-700" :
-                resultPercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                  resultPercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
               )}>
                 {resultPercentage >= 80 ? "Xuất sắc!" :
-                 resultPercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
+                  resultPercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
               </div>
             </div>
 
@@ -362,7 +421,7 @@ export default function QuizPage() {
               <div className={cn(
                 "text-7xl font-bold mb-4",
                 scorePercentage >= 80 ? "text-green-600" :
-                scorePercentage >= 50 ? "text-amber-600" : "text-red-600"
+                  scorePercentage >= 50 ? "text-amber-600" : "text-red-600"
               )}>
                 {score}/{quizzes.length}
               </div>
@@ -372,10 +431,10 @@ export default function QuizPage() {
               <div className={cn(
                 "inline-block px-6 py-3 rounded-full text-lg font-semibold",
                 scorePercentage >= 80 ? "bg-green-100 text-green-700" :
-                scorePercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                  scorePercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
               )}>
                 {scorePercentage >= 80 ? "Xuất sắc!" :
-                 scorePercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
+                  scorePercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
               </div>
             </div>
 
@@ -402,15 +461,15 @@ export default function QuizPage() {
                         currentQuestion === index
                           ? "bg-blue-600 text-white ring-2 ring-blue-300"
                           : answers[index] !== null
-                          ? "bg-green-100 text-green-700 border border-green-300"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            ? "bg-green-100 text-green-700 border border-green-300"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       )}
                     >
                       {index + 1}
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="text-sm text-gray-600 space-y-1 border-t pt-3">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-green-100 border border-green-300"></div>
@@ -457,19 +516,17 @@ export default function QuizPage() {
                         ></div>
                       </div>
                     </div>
-                    <div className={`text-lg font-bold px-4 py-2 rounded-lg ${
-                      timeLeft <= 60
-                        ? 'bg-red-100 text-red-700 animate-pulse'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
+                    <div className={`text-lg font-bold px-4 py-2 rounded-lg ${timeLeft <= 60
+                      ? 'bg-red-100 text-red-700 animate-pulse'
+                      : 'bg-blue-100 text-blue-700'
+                      }`}>
                       {formatTime(timeLeft)}
                     </div>
                   </div>
                   <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-300 ${
-                        timePercentage > 20 ? 'bg-green-500' : 'bg-red-500'
-                      }`}
+                      className={`h-full transition-all duration-300 ${timePercentage > 20 ? 'bg-green-500' : 'bg-red-500'
+                        }`}
                       style={{ width: `${timePercentage}%` }}
                     ></div>
                   </div>

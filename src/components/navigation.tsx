@@ -23,11 +23,16 @@ export default function Navigation() {
   const [showQuizWarning, setShowQuizWarning] = useState(false)
   const [showCompletedWarning, setShowCompletedWarning] = useState(false)
 
+  // Ẩn navigation khi đang làm bài trắc nghiệm
+  if (pathname === '/quiz') {
+    return null
+  }
+
   const links = [
     { href: '/', label: 'Trang chủ', protected: false, needsWarning: false },
     { href: '/review', label: 'Ôn tập', protected: true, needsWarning: false },
-    { href: '/quiz', label: 'Trắc nghiệm', protected: true, needsWarning: true },
-    { href: '/profile', label: 'Hồ sơ học sinh', protected: true, needsWarning: false },
+    // { href: '/quiz', label: 'Trắc nghiệm', protected: true, needsWarning: true },
+    // { href: '/profile', label: 'Hồ sơ học sinh', protected: true, needsWarning: false },
   ]
 
   const visibleLinks = links.filter(link => {

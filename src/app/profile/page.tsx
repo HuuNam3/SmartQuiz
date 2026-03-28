@@ -1,20 +1,52 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import { useStudent } from '@/context/student-context'
 
+type user = {
+  name: string,
+  className: string,
+  score: number,
+  updatedAt: string,
+}
+
 export default function ProfilePage() {
   const router = useRouter()
+  // const [users, setUsers] = useState<user[]>([]);
+  const [user, setUser] = useState<user>()
   const { studentInfo, clearStudentInfo, quizResult, hasCompletedQuiz } = useStudent()
 
   useEffect(() => {
     if (!studentInfo) {
       router.push('/')
     }
+
   }, [studentInfo, router])
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch("/api/users");
+        const data = await response.json();
+
+        const foundUser = data.find(
+          (u: user) =>
+            u.name === studentInfo?.name &&
+            u.className === studentInfo?.className
+        );
+
+        setUser(foundUser);
+        console.log(foundUser);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   if (!studentInfo) {
     return null
@@ -76,44 +108,41 @@ export default function ProfilePage() {
             </div>
             <h2 className="text-xl font-bold text-gray-800">Kết quả Trắc nghiệm</h2>
           </div>
-          
-          {hasCompletedQuiz && quizResult ? (
+
+          {user ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-center">
                   <p className="text-sm opacity-90 mb-1">Số câu đúng</p>
-                  <p className="text-3xl font-bold">{quizResult.score}/{quizResult.totalQuestions}</p>
+                  <p className="text-3xl font-bold">{user.score}/10</p>
                 </div>
-                <div className={`p-4 rounded-xl text-white text-center ${
-                  (quizResult.score / quizResult.totalQuestions) * 100 >= 80 
-                    ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
-                    : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-600' 
+                <div className={`p-4 rounded-xl text-white text-center ${(user.score / 10) * 100 >= 80
+                  ? 'bg-gradient-to-br from-emerald-500 to-green-600'
+                  : (user.score / 10) * 100 >= 50
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600'
                     : 'bg-gradient-to-br from-red-500 to-rose-600'
-                }`}>
+                  }`}>
                   <p className="text-sm opacity-90 mb-1">Điểm số</p>
                   <p className="text-3xl font-bold">
-                    {((quizResult.score / quizResult.totalQuestions) * 10).toFixed(1)}
+                    {((user.score / 10) * 10).toFixed(1)}
                   </p>
                 </div>
               </div>
-              
-              <div className={`p-4 rounded-xl text-center ${
-                (quizResult.score / quizResult.totalQuestions) * 100 >= 80 
-                  ? 'bg-emerald-50 border-2 border-emerald-200' 
-                  : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
-                  ? 'bg-amber-50 border-2 border-amber-200' 
+
+              <div className={`p-4 rounded-xl text-center ${(user.score / 10) * 100 >= 80
+                ? 'bg-emerald-50 border-2 border-emerald-200'
+                : (user.score / 10) * 100 >= 50
+                  ? 'bg-amber-50 border-2 border-amber-200'
                   : 'bg-red-50 border-2 border-red-200'
-              }`}>
-                <p className={`text-lg font-semibold ${
-                  (quizResult.score / quizResult.totalQuestions) * 100 >= 80 ? 'text-emerald-700' :
-                  (quizResult.score / quizResult.totalQuestions) * 100 >= 50 ? 'text-amber-700' : 'text-red-700'
                 }`}>
-                  {(quizResult.score / quizResult.totalQuestions) * 100 >= 80 
-                    ? 'Xuất sắc! Bạn đã nắm vững kiến thức.' 
-                    : (quizResult.score / quizResult.totalQuestions) * 100 >= 50 
-                    ? 'Khá tốt! Hãy tiếp tục ôn tập thêm.' 
-                    : 'Cần cố gắng thêm! Hãy xem lại phần ôn tập.'}
+                <p className={`text-lg font-semibold ${(user.score / 10) * 100 >= 80 ? 'text-emerald-700' :
+                  (user.score / 10) * 100 >= 50 ? 'text-amber-700' : 'text-red-700'
+                  }`}>
+                  {(user.score / 10) * 100 >= 80
+                    ? 'Xuất sắc! Bạn đã nắm vững kiến thức.'
+                    : (user.score / 10) * 100 >= 50
+                      ? 'Khá tốt! Hãy tiếp tục ôn tập thêm.'
+                      : 'Cần cố gắng thêm! Hãy xem lại phần ôn tập.'}
                 </p>
               </div>
             </div>
