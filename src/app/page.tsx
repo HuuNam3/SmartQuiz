@@ -23,6 +23,7 @@ type user = {
   className: string,
   score: number,
   startTime: number,
+  startDay: string,
   updatedAt: string,
 }
 
@@ -64,14 +65,12 @@ export default function Home() {
     // Create CSV content
     const headers = ['STT', 'Họ và tên', 'Lớp', 'Điểm', 'Ngày làm bài']
     const rows = users.map((record, index) => {
-      const coverDate = record.updatedAt.slice(0, 10);
-
       return [
         index + 1,
         record.name,
         record.className,
         record.score,
-        coverDate
+        record.startDay,
       ]
     })
 
@@ -144,7 +143,8 @@ export default function Home() {
       } else {
         setShowQuizWarning(true)
       }
-
+    } else {
+      setShowQuizWarning(true)
     }
   }
 
@@ -155,6 +155,13 @@ export default function Home() {
 
   const handleConfirmQuiz = async () => {
     try {
+      // const today = new Date();
+
+      // const day = String(today.getDate()).padStart(2, '0');
+      // const month = String(today.getMonth() + 1).padStart(2, '0');
+      // const year = today.getFullYear();
+
+      // const formattedDate = `${day}/${month}/${year}`;
       await fetch(`/api/users`, {
         method: "POST",
         headers: {
@@ -165,6 +172,7 @@ export default function Home() {
           // name: "nam1",
           // class: "11a11",
           startTime: Date.now(),
+          startDay: new Date().toLocaleDateString('vi-VN'),
           score: 0,
           updatedAt: new Date(),
         }),
