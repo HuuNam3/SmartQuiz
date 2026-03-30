@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { useStudent } from '@/context/student-context'
+import { UserType, useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 import {
   AlertDialog,
@@ -16,14 +16,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-
-type user = {
-  name: string,
-  className: string,
-  score: number,
-  startTime: number,
-  updatedAt: string,
-}
 
 // Ngân hàng 20 câu hỏi
 const allQuestions = [
@@ -149,8 +141,9 @@ const allQuestions = [
   },
 ]
 
-const QUIZ_COUNT = 10
-const QUIZ_DURATION = 15 * 60 * 1000 // 15 phút tính bằng giây
+const QUIZ_COUNT = 6
+const MAX_SCORE = 6
+const QUIZ_DURATION = 6 * 60 * 1000 // 15 phút tính bằng giây
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -166,12 +159,12 @@ export default function QuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<(number | null)[]>(Array(QUIZ_COUNT).fill(null))
   const [showScore, setShowScore] = useState(false)
-  const [timeLeft, setTimeLeft] = useState<number>()
+  const [timeLeft, setTimeLeft] = useState<number>(0)
   const [isTimeUp, setIsTimeUp] = useState(false)
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
   const router = useRouter()
-  const { studentInfo, hasCompletedQuiz, quizResult, setQuizResult, addStudentRecord, isAdmin } = useStudent()
+  const { user, setUser } = useUser()
 
   // Lấy ngẫu nhiên 10 câu từ 20 câu hỏi (chỉ chạy 1 lần khi component mount)
   const quizzes = useMemo(() => {
@@ -179,45 +172,32 @@ export default function QuizPage() {
   }, [])
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const data = await response.json();
+    if (!user) {
+      router.push('/')
+    }
 
-        const foundUser = data.find(
-          (u: user) =>
-            u.name === studentInfo?.name &&
-            u.className === studentInfo?.className
-        );
-
-        if (foundUser?.startTime) {
-          const endTime =
-            foundUser.startTime + QUIZ_DURATION;
-
-          const remainingSeconds = Math.floor(
-            (endTime - Date.now()) / 1000
-          );
-
-          setTimeLeft(
-            remainingSeconds > 0
-              ? remainingSeconds
-              : 0
-          );
-        } else {
-          setTimeLeft(QUIZ_DURATION / 1000);
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      }
-    };
-
-    fetchCourses();
-  }, []);
+  }, [user, router])
 
   // Timer effect
   useEffect(() => {
     if (isTimeUp || showScore) return
+
+    if (user?.startTime) {
+      const endTime =
+        user.startTime + QUIZ_DURATION;
+
+      const remainingSeconds = Math.floor(
+        (endTime - Date.now()) / 1000
+      );
+
+      setTimeLeft(
+        remainingSeconds > 0
+          ? remainingSeconds
+          : 0
+      );
+    } else {
+      setTimeLeft(QUIZ_DURATION / 1000);
+    }
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -230,14 +210,11 @@ export default function QuizPage() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isTimeUp, showScore])
+  }, [isTimeUp, showScore, user?.startTime])
 
-  // Kiểm tra nếu không có studentInfo, redirect về trang chủ
-  useEffect(() => {
-    if (!studentInfo) {
-      router.push('/')
-    }
-  }, [studentInfo, router])
+  if (!user) {
+    return null
+  }
 
   const handleAnswerClick = (index: number) => {
     const newAnswers = [...answers]
@@ -273,35 +250,25 @@ export default function QuizPage() {
   const handleConfirmSubmit = async () => {
     try {
       const finalScore = calculateScore()
+      const data: UserType = {
+        ...user,
+        // eslint-disable-next-line react-hooks/purity
+        endTime: Date.now(),
+        score: finalScore,
+        updatedAt: new Date(),
+      }
       await fetch(`/api/users`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: studentInfo?.name,
-          className: studentInfo?.className,
+          classId: user.classId,
           score: finalScore,
+          first: false,
         }),
       });
-      const completedAt = new Date()
-      setQuizResult({
-        score: finalScore,
-        totalQuestions: quizzes.length,
-        completedAt
-      })
-
-      // Save to all student records (only for non-admin users)
-      if (studentInfo && !isAdmin) {
-        addStudentRecord({
-          name: studentInfo.name,
-          className: studentInfo.className,
-          score: finalScore,
-          totalQuestions: quizzes.length,
-          completedAt
-        })
-      }
-
+      setUser(data)
       setShowSubmitConfirm(false)
       setShowScore(true)
     } catch (error) {
@@ -309,9 +276,9 @@ export default function QuizPage() {
     }
   }
 
-  const calculateScore = () => {
-    return answers.reduce((score, answer, index) => {
-      if (answer === quizzes[index].correct) {
+  const calculateScore = (): number => {
+    return answers.reduce<number>((score, answer, index) => {
+      if (answer === quizzes[index]?.correct) {
         return score + 1
       }
       return score
@@ -328,20 +295,16 @@ export default function QuizPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const timePercentage = (timeLeft / QUIZ_DURATION) * 100
+  const timePercentage = timeLeft ? (timeLeft / QUIZ_DURATION) * 100 : 0
 
   const answeredCount = answers.filter(a => a !== null).length
   const unansweredCount = quizzes.length - answeredCount
 
-  if (!studentInfo) {
-    return null // Sẽ redirect bằng useEffect
-  }
-
   // Nếu đã hoàn thành bài trắc nghiệm, hiển thị thông báo
-  if (hasCompletedQuiz && quizResult) {
-    const resultPercentage = (quizResult.score / quizResult.totalQuestions) * 100
+  if (user.endTime) {
+    const resultPercentage = (user.score / MAX_SCORE) * 100
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <Card className="p-8 text-center shadow-lg">
             <div className="mb-6">
@@ -361,7 +324,7 @@ export default function QuizPage() {
                 resultPercentage >= 80 ? "text-green-600" :
                   resultPercentage >= 50 ? "text-amber-600" : "text-red-600"
               )}>
-                {quizResult.score}/{quizResult.totalQuestions}
+                {user.score}/{MAX_SCORE}
               </div>
               <div className={cn(
                 "inline-block px-4 py-2 rounded-full text-sm font-semibold",
@@ -389,12 +352,12 @@ export default function QuizPage() {
   const scorePercentage = (score / quizzes.length) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 text-center mb-4">Trắc Nghiệm</h1>
           <p className="text-center text-gray-600 mb-4">
-            Học sinh: <span className="font-semibold text-blue-600">{studentInfo.name}</span> - Lớp: <span className="font-semibold text-blue-600">{studentInfo.className}</span>
+            Học sinh: <span className="font-semibold text-blue-600">{user.name}</span> - Lớp: <span className="font-semibold text-blue-600">{user.class}</span>
           </p>
         </div>
 
@@ -415,7 +378,7 @@ export default function QuizPage() {
           <Card className="p-8 text-center shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Kết quả của bạn</h2>
             <p className="text-lg text-gray-600 mb-6">
-              {studentInfo.name} - Lớp {studentInfo.className}
+              {user.name} - Lớp {user.class}
             </p>
             <div className="mb-8">
               <div className={cn(

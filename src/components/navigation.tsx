@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { useStudent } from '@/context/student-context'
+import { useUser } from '@/context/user-context'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,9 +19,7 @@ import {
 export default function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
-  const { studentInfo, hasCompletedQuiz } = useStudent()
-  const [showQuizWarning, setShowQuizWarning] = useState(false)
-  const [showCompletedWarning, setShowCompletedWarning] = useState(false)
+  const { user } = useUser()
 
   // Ẩn navigation khi đang làm bài trắc nghiệm
   if (pathname === '/quiz') {
@@ -31,32 +29,30 @@ export default function Navigation() {
   const links = [
     { href: '/', label: 'Trang chủ', protected: false, needsWarning: false },
     { href: '/review', label: 'Ôn tập', protected: true, needsWarning: false },
-    // { href: '/quiz', label: 'Trắc nghiệm', protected: true, needsWarning: true },
-    // { href: '/profile', label: 'Hồ sơ học sinh', protected: true, needsWarning: false },
   ]
 
-  const visibleLinks = links.filter(link => {
-    if (link.protected) {
-      return studentInfo !== null
-    }
-    return true
-  })
+  // const visibleLinks = links.filter(link => {
+  //   if (link.protected) {
+  //     return studentInfo !== null
+  //   }
+  //   return true
+  // })
 
-  const handleQuizClick = (e: React.MouseEvent, link: typeof links[0]) => {
-    if (link.needsWarning && pathname !== '/quiz') {
-      e.preventDefault()
-      if (hasCompletedQuiz) {
-        setShowCompletedWarning(true)
-      } else {
-        setShowQuizWarning(true)
-      }
-    }
-  }
+  // const handleQuizClick = (e: React.MouseEvent, link: typeof links[0]) => {
+  //   if (link.needsWarning && pathname !== '/quiz') {
+  //     e.preventDefault()
+  //     if (hasCompletedQuiz) {
+  //       setShowCompletedWarning(true)
+  //     } else {
+  //       setShowQuizWarning(true)
+  //     }
+  //   }
+  // }
 
-  const handleConfirmQuiz = () => {
-    setShowQuizWarning(false)
-    router.push('/quiz')
-  }
+  // const handleConfirmQuiz = () => {
+  //   setShowQuizWarning(false)
+  //   router.push('/quiz')
+  // }
 
   return (
     <>
@@ -72,11 +68,11 @@ export default function Navigation() {
               <span className="text-2xl font-bold">Hệ thống Quản lý</span>
             </div>
             <div className="flex gap-6">
-              {visibleLinks.map((link) => (
+              {links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={(e) => handleQuizClick(e, link)}
+                  // onClick={(e) => handleQuizClick(e, link)}
                   className={cn(
                     'px-4 py-2 rounded-lg transition-all duration-200',
                     pathname === link.href
@@ -92,7 +88,7 @@ export default function Navigation() {
         </div>
       </nav>
 
-      <AlertDialog open={showQuizWarning} onOpenChange={setShowQuizWarning}>
+      {/* <AlertDialog open={showQuizWarning} onOpenChange={setShowQuizWarning}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl text-amber-600">Lưu ý quan trọng!</AlertDialogTitle>
@@ -138,7 +134,7 @@ export default function Navigation() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </>
   )
 }

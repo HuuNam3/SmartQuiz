@@ -52,35 +52,36 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { name, className, score } = body;
-    console.log(name);
-    console.log(className);
-    console.log(score);
-
-    // Validate
-    if (!name || !className || score === undefined) {
-      return NextResponse.json(
-        { error: "name, class and score are required" },
-        { status: 400 },
-      );
-    }
+    const { classId, score, group, first } = body;
 
     const db = await getDb();
     const users = db.collection("users");
-
-    const result = await users.updateOne(
-      {
-        name: name,
-        className: className,
-      },
-      {
-        $set: {
-          score: score,
-          startTime: Date.now() - 30 * 60 * 1000,
-          updatedAt: new Date(),
+    let result
+    if(first) {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
+            group,
+            score,
+            startTime: Date.now(),
+            updatedAt: new Date(),
+          },
         },
-      },
-    );
+      );
+    } else {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
+            score,
+            endTime: Date.now(),
+            updatedAt: new Date(),
+          },
+        },
+      );
+    }
+
 
     if (result.matchedCount === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

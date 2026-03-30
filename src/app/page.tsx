@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { useStudent } from '@/context/student-context'
-// import ConfirmationModal from '@/components/confirmation-modal'
+import { useUser, UserType } from '@/context/user-context'
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,43 +18,30 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-type user = {
-  name: string,
-  className: string,
-  score: number,
-  startTime: number,
-  startDay: string,
-  updatedAt: string,
-}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 export default function Home() {
-  const [name, setName] = useState('')
-  const [className, setClassName] = useState('')
-  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [classId, setClassId] = useState('')
+  const [group, setGroup] = useState('')
   const [showQuizWarning, setShowQuizWarning] = useState(false)
   const [showCompletedWarning, setShowCompletedWarning] = useState(false)
-  const [showProfileWarning, setShowProfileWarning] = useState(false)
-  const [users, setUsers] = useState<user[]>([]);
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const { studentInfo, setStudentInfo, isAdmin, allStudentRecords, clearStudentInfo } = useStudent()
+  const { fetchUsers, user, users, clearUser, setUser } = useUser()
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const data = await response.json();
-        setUsers(data);
-        console.log(data)
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCourses();
-  }, []);
+    if (users.length == 0) {
+      fetchUsers();
+    }
+  }, [fetchUsers, users]);
 
   const exportToExcel = () => {
     if (users.length === 0) {
@@ -62,145 +49,137 @@ export default function Home() {
       return
     }
 
-    // Create CSV content
-    const headers = ['STT', 'Họ và tên', 'Lớp', 'Điểm', 'Ngày làm bài']
-    const rows = users.map((record, index) => {
-      return [
-        index + 1,
-        record.name,
-        record.className,
-        record.score,
-        record.startDay,
-      ]
+    const data = users
+      .filter((user) => !user.admin) // bỏ admin
+      .map((record, index) => {
+        const start = record.startTime
+          ? new Date(record.startTime)
+          : null
+
+        const end = record.endTime
+          ? new Date(record.endTime)
+          : null
+
+        let duration = ''
+
+        if (record.startTime && record.endTime) {
+          const diffMs = record.endTime - record.startTime
+          const minutes = Math.floor(diffMs / 60000)
+          const seconds = Math.floor((diffMs % 60000) / 1000)
+
+          duration = `${minutes} phút ${seconds} giây`
+        }
+
+        return {
+          STT: index + 1,
+          'Họ và tên': record.name,
+          'Lớp': record.class,
+          'Điểm': record.score,
+
+          'Ngày làm bài': start
+            ? start.toLocaleDateString('vi-VN')
+            : '',
+
+          'Thời gian bắt đầu': start
+            ? start.toLocaleTimeString('vi-VN')
+            : '',
+
+          'Thời gian kết thúc': end
+            ? end.toLocaleTimeString('vi-VN')
+            : '',
+
+          'Thời gian làm bài': duration,
+        }
+      })
+
+    const worksheet = XLSX.utils.json_to_sheet(data)
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQua')
+
+    const fileName = `ket_qua_trac_nghiem_${new Date()
+      .toLocaleDateString('vi-VN')
+      .replace(/\//g, '-')}.xlsx`
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
     })
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n')
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
 
-    // Add BOM for UTF-8 encoding
-    const BOM = '\uFEFF'
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `ket_qua_trac_nghiem_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    saveAs(blob, fileName)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (name.trim() && className.trim()) {
-      // Hiển thị modal xác nhận thay vì redirect ngay
-      setShowConfirmation(true)
+    if (!group) {
+      toast.warning('vui lòng chọn nhóm!')
+      return
     }
-
-    setStudentInfo({
-      name,
-      className,
-    })
-    setShowConfirmation(false)
-  }
-
-  const handleConfirm = () => {
-    // Chỉ lưu thông tin, không chuyển hướng
-    setStudentInfo({
-      name,
-      className,
-    })
-    setShowConfirmation(false)
-  }
-
-  const handleEdit = () => {
-    setShowConfirmation(false)
+    const findUser = users.find((u) => u.classId === classId)
+    if (findUser) {
+      setUser({
+        ...findUser,
+        group
+      })
+      toast.success('xác nhận mã học sinh thành công!')
+    } else {
+      toast.error('mã học sinh chưa đúng!')
+    }
   }
 
   const handleQuizClick = () => {
-    if (!studentInfo || !users) return
+    if (!user || !users) return
 
-    const existingUser = users.find(
-      (u) =>
-        u.name === studentInfo.name &&
-        u.className === studentInfo.className
-    )
-
-    if (existingUser) {
-      const endTime =
-        existingUser?.startTime + 15 * 60 * 1000;
-
-      const remainingSeconds = Math.floor(
-        (endTime - Date.now()) / 1000
-      )
-
-      console.log(remainingSeconds)
-
-      if (remainingSeconds < 0) {
-        setShowCompletedWarning(true)
-      } else {
-        setShowQuizWarning(true)
-      }
+    if (user?.endTime) {
+      setShowCompletedWarning(true)
     } else {
       setShowQuizWarning(true)
     }
   }
 
   const handleProfileClick = () => {
-    if (!studentInfo) return
+    if (!user) return
     router.push('/profile')
   }
 
   const handleConfirmQuiz = async () => {
+    if (user?.startTime) {
+      setShowQuizWarning(false)
+      router.push('/quiz')
+      return
+    }
     try {
-      // const today = new Date();
-
-      // const day = String(today.getDate()).padStart(2, '0');
-      // const month = String(today.getMonth() + 1).padStart(2, '0');
-      // const year = today.getFullYear();
-
-      // const formattedDate = `${day}/${month}/${year}`;
+      const data: UserType = {
+        ...user!,
+        startTime: Date.now(),
+        score: 0,
+      }
       await fetch(`/api/users`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...studentInfo!,
-          // name: "nam1",
-          // class: "11a11",
-          startTime: Date.now(),
-          startDay: new Date().toLocaleDateString('vi-VN'),
+          classId: user?.classId,
           score: 0,
-          updatedAt: new Date(),
+          group: user?.group,
+          first: true,
         }),
       });
+      setUser(data)
       setShowQuizWarning(false)
       router.push('/quiz')
     } catch (error) {
       console.error("Failed to save profile:", error);
     }
-
-  }
-
-  const handleProfileConfirm = () => {
-    setShowProfileWarning(false)
-    router.push('/profile')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
-      {/* {showConfirmation && (
-        <ConfirmationModal
-          studentName={name}
-          studentClass={className}
-          onConfirm={handleConfirm}
-          onEdit={handleEdit}
-        />
-      )} */}
-
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
       {showQuizWarning && (
         <AlertDialog open={showQuizWarning} onOpenChange={setShowQuizWarning}>
           <AlertDialogContent>
@@ -213,10 +192,11 @@ export default function Home() {
             <div className="text-base space-y-2 text-muted-foreground">
               <span className="block font-semibold text-gray-800">Bạn sắp vào phần Trắc nghiệm:</span>
               <ul className="list-disc list-inside text-gray-600 space-y-1">
-                <li>Bài trắc nghiệm gồm <strong>10 câu hỏi</strong></li>
-                <li>Thời gian làm bài: <strong>15 phút</strong></li>
+                <li>Bài trắc nghiệm gồm <strong>6 câu hỏi</strong></li>
+                <li>Thời gian làm bài: <strong>6 phút</strong></li>
                 <li>Bạn có thể chọn đáp án cho tất cả các câu trước khi nộp bài</li>
                 <li>Sau khi nộp bài, bạn không thể sửa lại đáp án</li>
+                <li>kiểm tra lại thông tin cá nhân xem đã chính xác chưa</li>
               </ul>
               <span className="block text-amber-600 font-medium mt-3">Bạn có chắc chắn muốn bắt đầu?</span>
             </div>
@@ -253,31 +233,6 @@ export default function Home() {
         </AlertDialog>
       )}
 
-      {/* {showProfileWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <Card className="p-8 max-w-md shadow-2xl bg-white">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Xem Hồ sơ Học sinh</h2>
-            <p className="text-gray-600 mb-2">Học sinh: <span className="font-semibold">{studentInfo?.name}</span></p>
-            <p className="text-gray-600 mb-6">Lớp: <span className="font-semibold">{studentInfo?.className}</span></p>
-            <p className="text-gray-700 mb-6">Bạn có muốn xem hồ sơ cá nhân của mình?</p>
-            <div className="flex gap-4">
-              <Button
-                onClick={() => setShowProfileWarning(false)}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
-              >
-                Hủy
-              </Button>
-              <Button
-                onClick={handleProfileConfirm}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-              >
-                Xem hồ sơ
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )} */}
-
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -288,10 +243,10 @@ export default function Home() {
         {/* Main Content */}
         <div className="grid md:grid-cols-2 gap-8 items-start">
           {/* Form Section - Only show if no student info */}
-          {!studentInfo ? (
+          {!user ? (
             <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -301,14 +256,14 @@ export default function Home() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Họ và tên
+                    Mã Học Sinh
                   </label>
                   <Input
-                    id="name"
+                    id="classId"
                     type="text"
-                    placeholder="Nhập họ và tên của bạn"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Nhập mã của bạn"
+                    value={classId}
+                    onChange={(e) => setClassId(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -316,22 +271,30 @@ export default function Home() {
 
                 <div>
                   <label htmlFor="className" className="block text-sm font-medium text-gray-700 mb-2">
-                    Lớp
+                    Nhóm
                   </label>
-                  <Input
-                    id="className"
-                    type="text"
-                    placeholder="Nhập lớp của bạn (vd: 10A, 11B)"
-                    value={className}
-                    onChange={(e) => setClassName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <Select
+                    value={group}
+                    onValueChange={(value) => setGroup(value)}
                     required
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn nhóm của bạn" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value="Nhóm 1">Nhóm 1</SelectItem>
+                      <SelectItem value="Nhóm 2">Nhóm 2</SelectItem>
+                      <SelectItem value="Nhóm 3">Nhóm 3</SelectItem>
+                      <SelectItem value="Nhóm 4">Nhóm 4</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+                  className="w-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -343,12 +306,12 @@ export default function Home() {
           ) : (
             <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0">
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isAdmin
-                  ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                  : 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.admin
+                  ? 'bg-linear-to-br from-amber-500 to-orange-600'
+                  : 'bg-linear-to-br from-emerald-500 to-teal-600'
                   }`}>
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isAdmin ? (
+                    {user.admin ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     ) : (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -356,52 +319,54 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {isAdmin ? 'Quản trị viên' : 'Xin chào!'}
+                  {user.admin ? 'Quản trị viên' : 'Xin chào!'}
                 </h2>
               </div>
 
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span className="text-gray-600">Họ và tên:</span>
-                  <span className="font-semibold text-gray-800 ml-auto">{studentInfo.name}</span>
+                  <span className="text-gray-600">Mã học sinh:</span>
+                  <span className="font-semibold text-gray-800 ml-auto">{user.classId}</span>
                 </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-100">
                   <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <span className="text-gray-600">Lớp:</span>
-                  <span className="font-semibold text-gray-800 ml-auto">{studentInfo.className}</span>
+                  <span className="text-gray-600">Nhóm:</span>
+                  <span className="font-semibold text-gray-800 ml-auto">{user.group}</span>
                 </div>
               </div>
 
-              {isAdmin && (
+              {user.admin && (
                 <div className="space-y-4 mb-6">
-                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
+                  <div className="p-4 bg-linear-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
                     <div className="flex items-center gap-2 mb-2">
                       <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
                       <p className="text-amber-800 font-semibold">Chế độ Quản trị viên</p>
                     </div>
-                    <p className="text-amber-700 text-sm">Số học sinh đã làm bài: <strong className="text-lg">{users.length}</strong></p>
+                    <p className="text-amber-700 text-sm">Số học sinh đã làm bài: <strong className="text-lg">{users.filter(
+                      (u) => !u.admin && u.endTime !== undefined
+                    ).length}</strong></p>
                   </div>
                   <Button
                     onClick={exportToExcel}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+                    className="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Xuất file Excel (CSV)
+                    Xuất file Excel (xlsx)
                   </Button>
                 </div>
               )}
 
               <Button
-                onClick={clearStudentInfo}
+                onClick={clearUser}
                 variant="outline"
                 className="w-full border-2 border-gray-200 text-gray-700 hover:bg-gray-50 py-3 rounded-xl transition-all duration-200"
               >
@@ -417,16 +382,16 @@ export default function Home() {
           <div className="space-y-6">
             <button
               onClick={handleQuizClick}
-              disabled={!studentInfo}
-              className={`w-full text-left transition-all duration-300 ${studentInfo
+              disabled={!user}
+              className={`w-full text-left transition-all duration-300 ${user
                 ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
                 : 'cursor-not-allowed opacity-60'
                 }`}
             >
-              <Card className={`p-6 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 shadow-xl border-0 ${studentInfo ? 'ring-2 ring-amber-200' : ''
+              <Card className={`p-6 bg-linear-to-br from-orange-50 via-amber-50 to-yellow-50 shadow-xl border-0 ${user ? 'ring-2 ring-amber-200' : ''
                 }`}>
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
+                  <div className="shrink-0 w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
@@ -434,8 +399,8 @@ export default function Home() {
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Trắc nghiệm</h3>
                     <p className="text-gray-600 mb-4 text-sm">Kiểm tra kiến thức của bạn thông qua các bài trắc nghiệm được thiết kế bao quát và toàn diện.</p>
-                    <p className={`text-sm font-semibold flex items-center gap-2 ${studentInfo ? 'text-amber-600' : 'text-gray-500'}`}>
-                      {studentInfo ? (
+                    <p className={`text-sm font-semibold flex items-center gap-2 ${user ? 'text-amber-600' : 'text-gray-500'}`}>
+                      {user ? (
                         <>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -451,16 +416,16 @@ export default function Home() {
 
             <button
               onClick={handleProfileClick}
-              disabled={!studentInfo}
-              className={`w-full text-left transition-all duration-300 ${studentInfo
+              disabled={!user}
+              className={`w-full text-left transition-all duration-300 ${user
                 ? 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]'
                 : 'cursor-not-allowed opacity-60'
                 }`}
             >
-              <Card className={`p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 shadow-xl border-0 ${studentInfo ? 'ring-2 ring-purple-200' : ''
+              <Card className={`p-6 bg-linear-to-br from-purple-50 via-pink-50 to-rose-50 shadow-xl border-0 ${user ? 'ring-2 ring-purple-200' : ''
                 }`}>
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <div className="shrink-0 w-14 h-14 rounded-2xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -468,8 +433,8 @@ export default function Home() {
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">Hồ sơ Học sinh</h3>
                     <p className="text-gray-600 mb-4 text-sm">Xem và quản lý thông tin hồ sơ cá nhân, kết quả học tập và các thành tích của bạn.</p>
-                    <p className={`text-sm font-semibold flex items-center gap-2 ${studentInfo ? 'text-purple-600' : 'text-gray-500'}`}>
-                      {studentInfo ? (
+                    <p className={`text-sm font-semibold flex items-center gap-2 ${user ? 'text-purple-600' : 'text-gray-500'}`}>
+                      {user ? (
                         <>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useStudent } from '@/context/student-context'
+import { useUser } from '@/context/user-context'
 import { Card } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
@@ -82,41 +82,41 @@ c) Các quyền và nghĩa vụ khác do Công ước quy định.`,
 
 export default function ReviewPage() {
   const router = useRouter()
-  const { studentInfo } = useStudent()
+  const { user } = useUser()
 
   useEffect(() => {
-    if (!studentInfo) {
+    if (!user) {
       router.push('/')
     }
-  }, [studentInfo, router])
+  }, [user, router])
 
-  if (!studentInfo) {
+  if (!user) {
     return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-sky-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-teal-500 to-cyan-500 shadow-lg mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-4">Ôn tập kiến thức</h1>
+          <h1 className="text-3xl font-bold bg-linear-to-br from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-4">Ôn tập kiến thức</h1>
           <div className="inline-flex items-center gap-4 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm shadow-sm">
             <span className="flex items-center gap-2 text-gray-600">
               <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="font-semibold text-teal-700">{studentInfo.name}</span>
+              <span className="font-semibold text-teal-700">{user.name}</span>
             </span>
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
             <span className="flex items-center gap-2 text-gray-600">
               <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <span className="font-semibold text-cyan-700">{studentInfo.className}</span>
+              <span className="font-semibold text-cyan-700">{user.class}</span>
             </span>
           </div>
           <p className="text-sm text-gray-500 mt-4">
@@ -125,9 +125,9 @@ export default function ReviewPage() {
         </div>
 
         <Card className="p-6 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
-          <div className="mb-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl">
+          <div className="mb-6 p-4 bg-linear-to-br from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -155,9 +155,9 @@ export default function ReviewPage() {
           </Accordion>
         </Card>
 
-        <Card className="p-6 shadow-xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200">
+        <Card className="p-6 shadow-xl bg-linear-to-br from-amber-50 to-orange-50 border-2 border-amber-200">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -166,31 +166,31 @@ export default function ReviewPage() {
           </div>
           <ul className="space-y-3 text-sm">
             <li className="flex items-start gap-3 text-amber-700">
-              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <span>Bài trắc nghiệm gồm <strong>10 câu hỏi</strong> được chọn ngẫu nhiên từ ngân hàng đề</span>
+              <span>Bài trắc nghiệm gồm <strong>6 câu hỏi</strong> được chọn ngẫu nhiên từ ngân hàng đề</span>
             </li>
             <li className="flex items-start gap-3 text-amber-700">
-              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Thời gian làm bài: <strong>15 phút</strong></span>
+              <span>Thời gian làm bài: <strong>6 phút</strong></span>
             </li>
             <li className="flex items-start gap-3 text-amber-700">
-              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <span>Mỗi học sinh <strong>chỉ được làm bài 1 lần</strong></span>
             </li>
             <li className="flex items-start gap-3 text-amber-700">
-              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
               <span>Sau khi nộp bài, bạn không thể làm lại</span>
             </li>
             <li className="flex items-start gap-3 text-amber-700">
-              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>Hãy đọc kỹ nội dung ôn tập trước khi bắt đầu làm bài</span>
