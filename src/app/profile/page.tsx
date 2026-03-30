@@ -8,7 +8,7 @@ import { useUser } from '@/context/user-context'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, clearUser } = useUser()
+  const { user, clearUser, users, setUser } = useUser()
 
   useEffect(() => {
     if (!user) {
@@ -17,9 +17,19 @@ export default function ProfilePage() {
 
   }, [user, router])
 
-  if (!user){
+  useEffect(() => {
+    const findUser = users.find((u) => u.classId === user?.classId)
+    clearUser()
+    if (findUser) {
+      setUser({
+        ...findUser,
+      })
+    }
+  }, [user?.classId, setUser, users, clearUser])
+
+  if (!user) {
     return null
-  } 
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-rose-50 py-12 px-4">

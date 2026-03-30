@@ -57,12 +57,21 @@ export async function PUT(request: Request) {
     const db = await getDb();
     const users = db.collection("users");
     let result
-    if(first) {
+    if(group) {
       result = await users.updateOne(
         { classId: classId },
         {
           $set: {
             group,
+            updatedAt: new Date(),
+          },
+        },
+      );
+    } else if(first) {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
             score,
             startTime: Date.now(),
             updatedAt: new Date(),

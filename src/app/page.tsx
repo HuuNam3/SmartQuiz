@@ -34,14 +34,60 @@ export default function Home() {
   const [group, setGroup] = useState('')
   const [showQuizWarning, setShowQuizWarning] = useState(false)
   const [showCompletedWarning, setShowCompletedWarning] = useState(false)
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editClassId, setEditClassId] = useState('')
+  const [editGroup, setEditGroup] = useState('')
+  const [pendingUser, setPendingUser] = useState<UserType | null>(null)
+  const [, setVerifyMode] = useState<'login' | 'profile'>('login')
   const router = useRouter()
   const { fetchUsers, user, users, clearUser, setUser } = useUser()
 
   useEffect(() => {
-    if (users.length == 0) {
-      fetchUsers();
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // const handleOpenVerifyDialog = () => {
+  //   if (user) {
+  //     setEditClassId(user.classId)
+  //     setEditGroup(user.group || '')
+  //     setShowVerifyDialog(true)
+  //   }
+  // }
+
+  const handleEditInfo = async () => {
+    if (!editGroup) {
+      toast.warning('vui lòng chọn nhóm!')
+      return
     }
-  }, [fetchUsers, users]);
+
+    try {
+      await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId: editClassId,
+          group: editGroup,
+        }),
+      });
+
+      setUser({
+        ...user!,
+        classId: editClassId,
+        group: editGroup
+      })
+
+      setShowVerifyDialog(false)
+      setIsEditMode(false)
+      toast.success('cập nhật thông tin thành công!')
+      fetchUsers()
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error('cập nhật thông tin thất bại!')
+    }
+  }
 
   const exportToExcel = () => {
     if (users.length === 0) {
@@ -113,21 +159,67 @@ export default function Home() {
     saveAs(blob, fileName)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!group) {
       toast.warning('vui lòng chọn nhóm!')
       return
     }
+    const findUserGroup = users.find(
+      (u) => u.classId === classId && u.group
+    )
+    clearUser()
     const findUser = users.find((u) => u.classId === classId)
-    if (findUser) {
-      setUser({
+
+    if (!findUserGroup) {
+      if (!findUser) {
+        toast.error('mã học sinh chưa đúng!')
+        return
+      }
+      // Show verification dialog for new login
+      const userToVerify = {
         ...findUser,
         group
-      })
-      toast.success('xác nhận mã học sinh thành công!')
+      }
+      setPendingUser(userToVerify)
+      setEditClassId(userToVerify.classId)
+      setEditGroup(userToVerify.group)
+      setVerifyMode('login')
+      setShowVerifyDialog(true)
     } else {
-      toast.error('mã học sinh chưa đúng!')
+      // Show verification dialog for existing user
+      setPendingUser(findUserGroup)
+      setEditClassId(findUserGroup.classId)
+      setEditGroup(findUserGroup.group)
+      setVerifyMode('login')
+      setShowVerifyDialog(true)
+    }
+  }
+
+  const handleConfirmVerify = async () => {
+    if (!pendingUser) return
+
+    try {
+      await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId: pendingUser.classId,
+          group: pendingUser.group,
+        }),
+      });
+
+      setUser(pendingUser)
+      setShowVerifyDialog(false)
+      setIsEditMode(false)
+      setPendingUser(null)
+      toast.success('xác nhận thông tin thành công!')
+      fetchUsers()
+    } catch (error) {
+      console.error("Failed to verify profile:", error);
+      toast.error('xác nhận thông tin thất bại!')
     }
   }
 
@@ -166,7 +258,6 @@ export default function Home() {
         body: JSON.stringify({
           classId: user?.classId,
           score: 0,
-          group: user?.group,
           first: true,
         }),
       });
@@ -205,6 +296,115 @@ export default function Home() {
               <AlertDialogAction onClick={handleConfirmQuiz} className="bg-blue-600 hover:bg-blue-700">
                 Bắt đầu làm bài
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {showVerifyDialog && (
+        <AlertDialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl text-blue-600">
+                {isEditMode ? 'Sửa thông tin học sinh' : 'Xác nhận thông tin học sinh'}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="sr-only">
+                {isEditMode ? 'Sửa thông tin của bạn' : 'Xác nhận lại thông tin học sinh'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4">
+              {!isEditMode ? (
+                <>
+                  {pendingUser?.name && (
+                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+                      <p className="text-sm text-gray-600 mb-1">Tên học sinh:</p>
+                      <p className="font-semibold text-gray-800 text-lg">{pendingUser.name}</p>
+                    </div>
+                  )}
+                  {pendingUser?.class && (
+                    <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                      <p className="text-sm text-gray-600 mb-1">Lớp:</p>
+                      <p className="font-semibold text-gray-800 text-lg">{pendingUser.class}</p>
+                    </div>
+                  )}
+                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <p className="text-sm text-gray-600 mb-1">Mã học sinh:</p>
+                    <p className="font-semibold text-gray-800 text-lg">{editClassId}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                    <p className="text-sm text-gray-600 mb-1">Nhóm:</p>
+                    <p className="font-semibold text-gray-800 text-lg">{editGroup}</p>
+                  </div>
+                  <p className="text-sm text-gray-700 text-center mt-4 font-medium">Thông tin của bạn đã chính xác chưa?</p>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mã Học Sinh
+                    </label>
+                    <Input
+                      type="text"
+                      value={editClassId}
+                      onChange={(e) => setEditClassId(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nhóm
+                    </label>
+                    <Select
+                      value={editGroup}
+                      onValueChange={(value) => setEditGroup(value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn nhóm của bạn" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Nhóm 1">Nhóm 1</SelectItem>
+                        <SelectItem value="Nhóm 2">Nhóm 2</SelectItem>
+                        <SelectItem value="Nhóm 3">Nhóm 3</SelectItem>
+                        <SelectItem value="Nhóm 4">Nhóm 4</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <AlertDialogFooter>
+              {!isEditMode ? (
+                <>
+                  <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+                  <Button
+                    onClick={() => setIsEditMode(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                  >
+                    Sửa thông tin
+                  </Button>
+                  <AlertDialogAction onClick={handleConfirmVerify} className="bg-green-600 hover:bg-green-700">
+                    Xác nhận
+                  </AlertDialogAction>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => setIsEditMode(false)}
+                    variant="outline"
+                  >
+                    Quay lại
+                  </Button>
+                  <Button
+                    onClick={handleEditInfo}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Lưu thay đổi
+                  </Button>
+                </>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -339,6 +539,16 @@ export default function Home() {
                   <span className="font-semibold text-gray-800 ml-auto">{user.group}</span>
                 </div>
               </div>
+
+              {/* <Button
+                onClick={handleOpenVerifyDialog}
+                className="w-full bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl mb-4"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Xác nhận lại thông tin
+              </Button> */}
 
               {user.admin && (
                 <div className="space-y-4 mb-6">

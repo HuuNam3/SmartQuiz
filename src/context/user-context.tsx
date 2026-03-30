@@ -46,11 +46,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  },[])
+  }, [])
 
-  const clearUser = () => {
+  const clearUser = useCallback(() => {
     setUser(undefined)
-  }
+  }, [])
 
   return (
     <UserContext.Provider

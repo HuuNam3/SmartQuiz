@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
@@ -17,126 +17,76 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-// Ngân hàng 20 câu hỏi
+// Ngân hàng 10 câu hỏi
 const allQuestions = [
   {
     id: 1,
-    question: 'Vùng biển nằm phía trong đường cơ sở, được xem như bộ phận lãnh thổ trên đất liền của nước ta là',
-    options: ['Lãnh hải.', 'Nội thủy.', 'Vùng tiếp giáp lãnh hải.', 'Vùng đặc quyền kinh tế.'],
+    question:
+      'Trong vùng Nội thủy, tàu thuyền nước ngoài nghiễm nhiên có quyền "đi qua không gây hại" tương tự như ở vùng Lãnh hải.',
+    options: ['Đúng', 'Sai'],
     correct: 1,
   },
   {
     id: 2,
-    question: 'Ranh giới ngoài của vùng biển nào sau đây được coi là đường biên giới quốc gia trên biển?',
-    options: ['Nội thủy.', 'Vùng đặc quyền kinh tế.', 'Lãnh hải.', 'Vùng tiếp giáp lãnh hải.'],
-    correct: 2,
+    question:
+      'Ranh giới ngoài của vùng Tiếp giáp lãnh hải (cách đường cơ sở 24 hải lý) được coi là biên giới quốc gia trên biển của Việt Nam.',
+    options: ['Đúng', 'Sai'],
+    correct: 1,
   },
   {
     id: 3,
-    question: 'Vùng tiếp giáp lãnh hải của nước ta được quy định rộng bao nhiêu hải lí?',
-    options: ['12 hải lí tính từ ranh giới ngoài của lãnh hải.', '12 hải lí tính từ đường cơ sở.', '200 hải lí tính từ đường cơ sở.', 'Chiều rộng tùy thuộc vào độ sâu của thềm lục địa.'],
+    question:
+      'Tại vùng Đặc quyền kinh tế (200 hải lý), Việt Nam có quyền chủ quyền đối với cả tài nguyên sinh vật và tài nguyên không sinh vật ở cột nước và đáy biển.',
+    options: ['Đúng', 'Sai'],
     correct: 0,
   },
   {
     id: 4,
-    question: 'Tại vùng đặc quyền kinh tế, nước ta có quyền nào sau đây?',
-    options: ['Có chủ quyền hoàn toàn và tuyệt đối như trên đất liền.', 'Có quyền chủ quyền về kinh tế, quyền tài phán quốc gia.', 'Cấm hoàn toàn tàu thuyền nước ngoài đi qua.', 'Chỉ có quyền khai thác dầu khí ở đáy biển.'],
+    question:
+      'Mọi hoạt động nghiên cứu khoa học của tổ chức quốc tế tại vùng Đặc quyền kinh tế Việt Nam chỉ cần thông báo cho Việt Nam biết là có thể thực hiện.',
+    options: ['Đúng', 'Sai'],
     correct: 1,
   },
   {
     id: 5,
-    question: 'Phần ngầm dưới đáy biển và lòng đất dưới đáy biển thuộc phần kéo dài tự nhiên của lục địa cho đến mép ngoài của rìa lục địa được gọi là',
-    options: ['Đáy biển quốc tế.', 'Vùng đặc quyền kinh tế.', 'Thềm lục địa.', 'Hệ sinh thái biển sâu.'],
-    correct: 2,
-  },
-  {
-    id: 6,
-    question: 'Ở vùng tiếp giáp lãnh hải, Nhà nước ta có quyền thực hiện các biện pháp để kiểm soát các vi phạm về',
-    options: ['Hàng không dân dụng.', 'Y tế, thuế vụ, hải quan, nhập cư.', 'Thăm dò dầu khí quốc tế.', 'Nghiên cứu khoa học của mọi quốc gia.'],
+    question:
+      'Nếu Việt Nam không có khả năng khai thác hết tài nguyên ở Thềm lục địa, các quốc gia khác có quyền tự do đến khai thác phần dư thừa đó.',
+    options: ['Đúng', 'Sai'],
     correct: 1,
   },
   {
-    id: 7,
-    question: 'Điểm giống nhau về chế độ pháp lí giữa vùng đặc quyền kinh tế và thềm lục địa nước ta là',
-    options: ['Đều rộng 200 hải lí tính từ đường cơ sở.', 'Đều được coi là bộ phận lãnh thổ trên đất liền.', 'Đều là vùng biển thuộc chủ quyền tuyệt đối.', 'Tàu thuyền nước ngoài không được phép đi qua.'],
+    id: 6,
+    question:
+      'Một hành vi vi phạm pháp luật về y tế xảy ra tại vùng Tiếp giáp lãnh hải vẫn có thể bị lực lượng chức năng Việt Nam bắt giữ và xử lý.',
+    options: ['Đúng', 'Sai'],
     correct: 0,
   },
   {
+    id: 7,
+    question:
+      'Tàu thuyền nước ngoài khi đi qua Lãnh hải Việt Nam được quyền tiến hành các hoạt động nghiên cứu, đo đạc nếu thiết bị đó không gây ô nhiễm môi trường biển.',
+    options: ['Đúng', 'Sai'],
+    correct: 1,
+  },
+  {
     id: 8,
-    question: 'Đường cơ sở của nước ta được xác định là đường',
-    options: ['Nối các đảo xa nhất ngoài khơi.', 'Nối các mũi đất xa nhất và các đảo ven bờ.', 'Cách bờ biển 12 hải lí.', 'Mép nước thủy triều thấp nhất tại mọi điểm.'],
+    question:
+      'Việt Nam có quyền chủ quyền đối với tất cả các loài sinh vật sống trong vùng nước phía trên Thềm lục địa, dù vùng đó nằm ngoài 200 hải lý.',
+    options: ['Đúng', 'Sai'],
     correct: 1,
   },
   {
     id: 9,
-    question: 'Nước ta có quyền tài phán quốc gia ở vùng biển nào?',
-    options: ['Chỉ ở lãnh hải.', 'Vùng đặc quyền kinh tế và thềm lục địa.', 'Chỉ ở nội thủy.', 'Tất cả các vùng biển ngoài khơi quốc tế.'],
-    correct: 1,
+    question:
+      'Mọi đảo nhân tạo, thiết bị và công trình do nước ngoài xây dựng trong vùng Đặc quyền kinh tế của Việt Nam mà không có sự đồng ý của Chính phủ Việt Nam đều được coi là bất hợp pháp.',
+    options: ['Đúng', 'Sai'],
+    correct: 0,
   },
   {
     id: 10,
-    question: 'Ý nghĩa quan trọng nhất của việc khẳng định chủ quyền các đảo và quần đảo đối với an ninh quốc phòng là',
-    options: ['Tạo điều kiện để phát triển ngành đánh bắt thủy sản.', 'Làm căn cứ để khẳng định chủ quyền đối với các vùng biển và thềm lục địa.', 'Phát triển du lịch biển đảo.', 'Tìm kiếm và cứu hộ trên biển dễ dàng hơn.'],
-    correct: 1,
-  },
-  {
-    id: 11,
-    question: 'Vùng biển có chiều rộng 12 hải lí tính từ đường cơ sở ra phía biển là',
-    options: ['Nội thủy.', 'Lãnh hải.', 'Vùng đặc quyền kinh tế.', 'Vùng tiếp giáp lãnh hải.'],
-    correct: 1,
-  },
-  {
-    id: 12,
-    question: 'Sự khác biệt cơ bản giữa nội thủy và lãnh hải là',
-    options: ['Nội thủy nằm ngoài đường cơ sở, lãnh hải nằm trong đường cơ sở.', 'Nội thủy được xem như đất liền, lãnh hải là vùng chủ quyền trên biển.', 'Nội thủy rộng 12 hải lí, lãnh hải rộng 24 hải lí.', 'Lãnh hải có quyền tài phán, nội thủy thì không.'],
-    correct: 1,
-  },
-  {
-    id: 13,
-    question: 'Tại vùng tiếp giáp lãnh hải, mục đích chính của việc Nhà nước thực hiện quyền kiểm soát là để',
-    options: ['Khai thác tài nguyên khoáng sản dưới đáy biển.', 'Bảo vệ an ninh, quốc phòng và các quy định về thuế, y tế.', 'Xây dựng các đảo nhân tạo và thiết bị trên biển.', 'Nghiên cứu các dòng hải lưu và sinh vật biển.'],
-    correct: 1,
-  },
-  {
-    id: 14,
-    question: 'Vùng đặc quyền kinh tế của nước ta là vùng biển rộng bao nhiêu hải lí tính từ đường cơ sở?',
-    options: ['12 hải lí.', '24 hải lí.', '200 hải lí.', '350 hải lí.'],
-    correct: 2,
-  },
-  {
-    id: 15,
-    question: 'Trong vùng đặc quyền kinh tế, quốc gia ven biển không có quyền nào sau đây?',
-    options: ['Quyền khai thác, bảo tồn và quản lý tài nguyên thiên nhiên.', 'Quyền ngăn cản tàu thuyền nước ngoài đi qua.', 'Quyền tài phán về nghiên cứu khoa học biển.', 'Quyền lắp đặt các đảo nhân tạo và công trình trên biển.'],
-    correct: 1,
-  },
-  {
-    id: 16,
-    question: 'Đặc điểm nào sau đây đúng với vùng thềm lục địa của nước ta?',
-    options: ['Là vùng nước nằm phía trên đáy biển và lòng đất dưới đáy biển.', 'Có chủ quyền hoàn toàn về mặt kinh tế đối với cột nước.', 'Gồm đáy biển và lòng đất dưới đáy biển, rộng tối thiểu 200 hải lí.', 'Có ranh giới ngoài luôn trùng với ranh giới lãnh hải.'],
-    correct: 2,
-  },
-  {
-    id: 17,
-    question: 'Đường biên giới quốc gia trên biển của Việt Nam được xác định bởi',
-    options: ['Đường cơ sở dùng để tính chiều rộng lãnh hải.', 'Ranh giới ngoài của vùng lãnh hải.', 'Ranh giới ngoài của vùng đặc quyền kinh tế.', 'Đường nối các đảo xa nhất của hai quần đảo Hoàng Sa và Trường Sa.'],
-    correct: 1,
-  },
-  {
-    id: 18,
-    question: 'Việc khai thác dầu khí ở vùng biển nước ta hiện nay chủ yếu diễn ra ở vùng nào?',
-    options: ['Nội thủy.', 'Lãnh hải.', 'Thềm lục địa.', 'Vùng tiếp giáp lãnh hải.'],
-    correct: 2,
-  },
-  {
-    id: 19,
-    question: 'Thứ tự các vùng biển từ đất liền ra xa khơi là',
-    options: ['Lãnh hải, nội thủy, tiếp giáp lãnh hải, đặc quyền kinh tế, thềm lục địa.', 'Nội thủy, lãnh hải, tiếp giáp lãnh hải, đặc quyền kinh tế, thềm lục địa.', 'Nội thủy, lãnh hải, đặc quyền kinh tế, tiếp giáp lãnh hải, thềm lục địa.', 'Lãnh hải, tiếp giáp lãnh hải, đặc quyền kinh tế, thềm lục địa, nội thủy.'],
-    correct: 1,
-  },
-  {
-    id: 20,
-    question: 'Nước ta có chủ quyền hoàn toàn, tuyệt đối ở vùng biển nào?',
-    options: ['Lãnh hải.', 'Nội thủy.', 'Vùng tiếp giáp lãnh hải.', 'Vùng đặc quyền kinh tế.'],
+    question:
+      'Người dân địa phương có quyền tự do xây dựng các khu nuôi trồng thủy sản cố định trong nội thủy vì đây là vùng nước tiếp giáp đất liền, không thuộc quản lý của Luật Biển.',
+    options: ['Đúng', 'Sai'],
     correct: 1,
   },
 ]
@@ -164,7 +114,7 @@ export default function QuizPage() {
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
   const router = useRouter()
-  const { user, setUser } = useUser()
+  const { user, setUser, fetchUsers } = useUser()
 
   // Lấy ngẫu nhiên 10 câu từ 20 câu hỏi (chỉ chạy 1 lần khi component mount)
   const quizzes = useMemo(() => {
@@ -190,6 +140,7 @@ export default function QuizPage() {
         (endTime - Date.now()) / 1000
       );
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeLeft(
         remainingSeconds > 0
           ? remainingSeconds
@@ -211,6 +162,41 @@ export default function QuizPage() {
 
     return () => clearInterval(timer)
   }, [isTimeUp, showScore, user?.startTime])
+
+  const calculateScore = useCallback((): number => {
+    return answers.reduce<number>((score, answer, index) => {
+      if (answer === quizzes[index]?.correct) {
+        return score + 1
+      }
+      return score
+    }, 0)
+  }, [answers, quizzes])
+
+  useEffect(() => {
+    if (!isTimeUp || !user) return
+    const finalScore = calculateScore()
+
+    const submitQuiz = async () => {
+      try {
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: user.classId,
+            score: finalScore,
+            first: false,
+          }),
+        });
+        fetchUsers()
+      } catch (error) {
+        console.error("Failed to save user:", error);
+      }
+    }
+
+    submitQuiz()
+  }, [isTimeUp, calculateScore, user, fetchUsers])
 
   if (!user) {
     return null
@@ -248,11 +234,11 @@ export default function QuizPage() {
   }
 
   const handleConfirmSubmit = async () => {
+    if (!user) return
     try {
       const finalScore = calculateScore()
       const data: UserType = {
         ...user,
-        // eslint-disable-next-line react-hooks/purity
         endTime: Date.now(),
         score: finalScore,
         updatedAt: new Date(),
@@ -271,18 +257,10 @@ export default function QuizPage() {
       setUser(data)
       setShowSubmitConfirm(false)
       setShowScore(true)
+      fetchUsers()
     } catch (error) {
       console.error("Failed to save user:", error);
     }
-  }
-
-  const calculateScore = (): number => {
-    return answers.reduce<number>((score, answer, index) => {
-      if (answer === quizzes[index]?.correct) {
-        return score + 1
-      }
-      return score
-    }, 0)
   }
 
   const handleGoToProfile = () => {
@@ -365,10 +343,17 @@ export default function QuizPage() {
           <Card className="p-8 text-center shadow-lg bg-red-50 border-2 border-red-300">
             <h2 className="text-3xl font-bold text-red-600 mb-6">Hết thời gian!</h2>
             <p className="text-lg text-gray-700 mb-8">
-              Thời gian làm bài 15 phút của bạn đã hết. Bài làm của bạn sẽ được nộp tự động.
+              Thời gian làm bài 6 phút của bạn đã hết. Bài làm của bạn sẽ được nộp tự động.
             </p>
             <Button
-              onClick={() => setShowScore(true)}
+              onClick={() => {
+                const newScore = calculateScore()
+                setUser({
+                  ...user,
+                  score: newScore
+                })
+                setShowScore(true)
+              }}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
             >
               Xem Kết Quả
