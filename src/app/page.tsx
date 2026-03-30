@@ -190,7 +190,7 @@ export default function Home() {
       // Show verification dialog for existing user
       setPendingUser(findUserGroup)
       setEditClassId(findUserGroup.classId)
-      setEditGroup(findUserGroup.group)
+      setEditGroup(findUserGroup.group || '')
       setVerifyMode('login')
       setShowVerifyDialog(true)
     }
