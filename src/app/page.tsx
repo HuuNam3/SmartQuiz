@@ -47,14 +47,6 @@ export default function Home() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // const handleOpenVerifyDialog = () => {
-  //   if (user) {
-  //     setEditClassId(user.classId)
-  //     setEditGroup(user.group || '')
-  //     setShowVerifyDialog(true)
-  //   }
-  // }
-
   const handleEditInfo = async () => {
     if (!editGroup) {
       toast.warning('vui lòng chọn nhóm!')
@@ -78,6 +70,7 @@ export default function Home() {
         classId: editClassId,
         group: editGroup
       })
+
 
       setShowVerifyDialog(false)
       setIsEditMode(false)
@@ -217,6 +210,9 @@ export default function Home() {
       setPendingUser(null)
       toast.success('xác nhận thông tin thành công!')
       fetchUsers()
+      if(classId !== 'admin333') {
+        router.push('/review')
+      }
     } catch (error) {
       console.error("Failed to verify profile:", error);
       toast.error('xác nhận thông tin thất bại!')
@@ -288,6 +284,7 @@ export default function Home() {
                 <li>Bạn có thể chọn đáp án cho tất cả các câu trước khi nộp bài</li>
                 <li>Sau khi nộp bài, bạn không thể sửa lại đáp án</li>
                 <li>kiểm tra lại thông tin cá nhân xem đã chính xác chưa</li>
+                <li>chỉ được làm bài 1 lần bạn nên ôn tập trước khi vào làm</li>
               </ul>
               <span className="block text-amber-600 font-medium mt-3">Bạn có chắc chắn muốn bắt đầu?</span>
             </div>

@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useUser } from '@/context/user-context'
 import { Card } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 const reviewContent = [
   {
@@ -409,6 +410,16 @@ export default function ReviewPage() {
             </li>
           </ul>
         </Card>
+
+        <div className="mt-8 flex justify-center">
+        <Button
+          size="lg"
+          className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
+          onClick={() => router.push('/')}
+        >
+          quay về làm bài trắc nghiệm
+        </Button>
+      </div>
       </div>
     </div>
   )
