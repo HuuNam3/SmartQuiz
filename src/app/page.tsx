@@ -436,7 +436,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Chào mừng đến với Hệ thống Quản lý Học sinh</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Chào mừng đến với Hệ thống ôn tập chủ quyền Biển đảo Việt Nam</h1>
           <p className="text-lg text-gray-600">Vui lòng nhập thông tin của bạn để tiếp tục</p>
         </div>
 

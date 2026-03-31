@@ -17,26 +17,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Hệ thống Quản lý Học sinh',
-  description: 'Ứng dụng quản lý thông tin học sinh',
+  title: 'Củng cố kiến thức bài học',
+  description: 'Ứng dụng củng cố kiến thức bài học',
   generator: 'v0.app',
-  // icons: {
-  //   icon: [
-  //     {
-  //       url: '/icon-light-32x32.png',
-  //       media: '(prefers-color-scheme: light)',
-  //     },
-  //     {
-  //       url: '/icon-dark-32x32.png',
-  //       media: '(prefers-color-scheme: dark)',
-  //     },
-  //     {
-  //       url: '/icon.svg',
-  //       type: 'image/svg+xml',
-  //     },
-  //   ],
-  // apple: '/apple-icon.png',
-  // },
+  icons: {
+    icon: [
+      {
+        url: 'https://filethpt.hcm.edu.vn/UploadImages/Config/thptlethihonggam/Logo%20LTHG.GIF',
+        media: '(prefers-color-scheme: light)',
+      },
+      // {
+      //   url: '/icon-dark-32x32.png',
+      //   media: '(prefers-color-scheme: dark)',
+      // },
+      // {
+      //   url: '/icon.svg',
+      //   type: 'image/svg+xml',
+      // },
+    ],
+  },
 }
 
 export default function RootLayout({

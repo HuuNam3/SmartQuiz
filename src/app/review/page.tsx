@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useUser } from '@/context/user-context'
 import { Card } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -95,33 +96,51 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-teal-50 via-cyan-50 to-sky-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-teal-500 to-cyan-500 shadow-lg mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-red-600 to-rose-600 shadow-lg mb-4 ring-4 ring-yellow-300/70">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold bg-linear-to-br from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-4">Ôn tập kiến thức</h1>
-          <div className="inline-flex items-center gap-4 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm shadow-sm">
-            <span className="flex items-center gap-2 text-gray-600">
-              <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h1 className="text-3xl font-bold bg-linear-to-r from-red-700 via-rose-600 to-amber-500 bg-clip-text text-transparent mb-4">Ôn tập kiến thức</h1>
+          <div className="inline-flex items-center gap-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-red-100">
+            <span className="flex items-center gap-2 text-gray-700">
+              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="font-semibold text-teal-700">{user.name}</span>
+              <span className="font-semibold text-red-700">{user.name}</span>
             </span>
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span className="flex items-center gap-2 text-gray-600">
-              <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="flex items-center gap-2 text-gray-700">
+              <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <span className="font-semibold text-cyan-700">{user.class}</span>
+              <span className="font-semibold text-amber-700">{user.class}</span>
             </span>
           </div>
           <p className="text-sm text-gray-500 mt-4">
             Đọc kỹ các nội dung bên dưới trước khi làm bài trắc nghiệm
           </p>
+        </div>
+
+        <div className="mb-6">
+          <div className="relative w-full aspect-[16/7] rounded-2xl border-2 border-yellow-300 bg-white shadow-lg overflow-hidden">
+            <Image
+              src="/den_voi_truong_sa.png"
+              alt="Banner biển đảo Trường Sa"
+              fill
+              sizes="(max-width: 768px) 100vw, 1024px"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 text-white">
+              <h2 className="text-xl sm:text-2xl font-bold drop-shadow-md">Biển đảo Việt Nam</h2>
+              <p className="text-sm sm:text-base text-white/90 drop-shadow-md">Tự hào Tổ quốc - Vững vàng chủ quyền biển, đảo.</p>
+            </div>
+          </div>
         </div>
 
         <Card className="p-6 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
@@ -146,9 +165,202 @@ export default function ReviewPage() {
                   {item.title}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-line leading-relaxed">
-                    {item.content}
-                  </div>
+                  {item.id === 'noi-thuy' ? (
+                    <div className="max-w-4xl mx-auto font-sans">
+                      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-5 rounded-2xl shadow-lg mb-5 border-l-8 border-yellow-400">
+                        <h4 className="text-xl font-bold mb-2">⚖️ Luật Biển Việt Nam 2012</h4>
+                        <p className="italic">
+                          "Nội thủy là vùng nước tiếp giáp bờ biển, ở phía trong đường cơ sở và là bộ phận lãnh thổ của Việt Nam."
+                        </p>
+                      </div>
+
+                      <div className="bg-blue-50 p-4 rounded-xl shadow mb-4">
+                        <h4 className="font-semibold text-lg mb-2">📌 Khái niệm</h4>
+                        <p className="text-gray-700">
+                          Nội thủy là một phần lãnh thổ của quốc gia, bao gồm sông, hồ, ao, đầm, vùng đầm lầy và các kênh đào, nằm phía
+                          trong đường cơ sở, với phạm vi khoảng 12 hải lý (22,2 km).
+                        </p>
+                      </div>
+
+                      <div className="bg-green-50 p-4 rounded-xl shadow mb-4">
+                        <h4 className="font-semibold text-lg mb-2">✅ Quyền của người dân</h4>
+                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
+                          <li>Sử dụng tài nguyên để sinh hoạt và sản xuất</li>
+                          <li>Phát triển kinh tế</li>
+                          <li>Tham gia quản lý và sử dụng tài nguyên</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-red-50 p-4 rounded-xl shadow mb-4">
+                        <h4 className="font-semibold text-lg mb-2">🛡️ Nghĩa vụ</h4>
+                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
+                          <li>Bảo vệ tài nguyên và môi trường</li>
+                          <li>Tuân thủ quy định pháp luật</li>
+                          <li>Đăng ký và xin phép khi khai thác tài nguyên</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-yellow-50 p-4 rounded-xl shadow mt-6">
+                        <h4 className="font-semibold text-lg mb-2">💬 Thông điệp</h4>
+                        <p className="text-gray-700">
+                          Hãy sử dụng hợp lý tài nguyên và cùng bảo vệ môi trường vùng nội thủy để phát triển bền vững.
+                        </p>
+                      </div>
+                    </div>
+                  ) : item.id === 'lanh-hai' ? (
+                    <div className="max-w-4xl mx-auto font-sans space-y-4">
+                      <div className="bg-gradient-to-r from-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-cyan-300">
+                        <h4 className="text-xl font-bold mb-2">🧭 Khái niệm lãnh hải</h4>
+                        <p className="text-white/95">
+                          Theo Luật Biển Việt Nam năm 2012, <strong>Lãnh hải</strong> là vùng biển có chiều rộng <strong>12 hải lý</strong>{' '}
+                          tính từ đường cơ sở ra phía biển. Ranh giới ngoài của lãnh hải là <strong>biên giới quốc gia trên biển</strong> của Việt Nam.
+                        </p>
+                      </div>
+
+                      <div className="bg-sky-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">⚖️ Chế độ pháp lý (Điều 12 khoản 1)</h4>
+                        <p className="text-gray-700">
+                          Nhà nước thực hiện <strong>chủ quyền đầy đủ và toàn vẹn</strong> đối với lãnh hải, vùng trời trên lãnh hải, đáy biển và lòng
+                          đất dưới đáy biển của lãnh hải phù hợp với Công ước của Liên hợp quốc về Luật Biển năm 1982.
+                        </p>
+                      </div>
+
+                      <div className="bg-emerald-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">🚢 Quyền đi qua không gây hại</h4>
+                        <p className="text-gray-700 mb-3">
+                          Theo Công ước Liên hợp quốc về Luật Biển năm 1982 (Điều 17): Với điều kiện phải tuân theo Công ước này, tàu thuyền của tất cả
+                          các quốc gia, có biển hay không có biển, đều được hưởng <strong>quyền đi qua không gây hại</strong> trong lãnh hải.
+                        </p>
+                        <div className="bg-white/70 border border-emerald-200 rounded-lg p-3">
+                          <p className="text-gray-700">
+                            Việc đi qua phải <strong>liên tục</strong> và <strong>nhanh chóng</strong>. Tuy nhiên, việc đi qua bao gồm cả việc dừng lại và
+                            neo đậu, nhưng chỉ trong chừng mực những việc này là những sự cố thông thường của hành trình hoặc do bất khả kháng hay gặp nạn,
+                            hoặc nhằm cứu giúp người, tàu thuyền hay phương tiện bay gặp nguy hiểm hay bị nạn.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="relative w-full aspect-[16/9] rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
+                          <Image
+                            src="/lanhquyen.png"
+                            alt="Minh họa lãnh hải và chủ quyền"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 768px"
+                            className="object-contain"
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-center text-gray-600 italic">
+                          Cần ngăn chặn các hành vi ảnh hưởng đến an ninh quốc gia.
+                        </p>
+                      </div>
+                    </div>
+                  ) : item.id === 'vung-tiep-giap' ? (
+                    <div className="max-w-4xl mx-auto font-sans space-y-4">
+                      <div className="bg-gradient-to-r from-cyan-600 to-teal-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-emerald-300">
+                        <h4 className="text-xl font-bold mb-2">🌐 Khái niệm vùng tiếp giáp lãnh hải</h4>
+                        <p className="text-white/95">
+                          Vùng tiếp giáp lãnh hải là vùng biển nằm liền kề bên ngoài lãnh hải, chồng lấn với vùng đặc quyền kinh tế và thềm lục địa.
+                        </p>
+                      </div>
+
+                      <div className="bg-cyan-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">📍 Vị trí địa lý</h4>
+                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
+                          <li>Vị trí: Nằm ngoài lãnh hải và tiếp liền với lãnh hải.</li>
+                          <li>Chiều rộng: Không quá 24 hải lý tính từ đường cơ sở dùng để tính chiều rộng lãnh hải.</li>
+                          <li>Khoảng cách: Vùng này rộng 12 hải lý tính từ ranh giới phía ngoài của lãnh hải.</li>
+                          <li>Vị trí so với các vùng biển khác: Chồng lấn với vùng đặc quyền kinh tế và thềm lục địa.</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-teal-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">🛡️ Vai trò và nhiệm vụ kiểm soát</h4>
+                        <p className="text-gray-700 mb-3">
+                          Đây là khu vực chuyển tiếp quan trọng, nơi quốc gia ven biển thực hiện các biện pháp an ninh, quốc phòng và bảo vệ các quyền lợi chuyên biệt.
+                        </p>
+                        <div className="bg-white/70 border border-teal-200 rounded-lg p-3">
+                          <p className="text-gray-700 mb-2">
+                            Theo Điều 48 Luật Biển Việt Nam 2012, lực lượng tuần tra, kiểm soát trên biển có nhiệm vụ:
+                          </p>
+                          <ul className="list-disc ml-5 text-gray-700 space-y-1">
+                            <li>Bảo vệ chủ quyền, quyền chủ quyền, quyền tài phán và lợi ích quốc gia.</li>
+                            <li>Bảo đảm thi hành pháp luật Việt Nam.</li>
+                            <li>Bảo vệ tài sản nhà nước, tài nguyên và môi trường biển.</li>
+                            <li>Tham gia tìm kiếm cứu nạn, cứu hộ.</li>
+                            <li>Xử lý các hành vi vi phạm pháp luật trên các vùng biển, đảo của Việt Nam.</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="relative w-full aspect-[16/9] rounded-lg border border-cyan-100 bg-white shadow-sm overflow-hidden">
+                          <Image
+                            src="/tepgiaplh.png"
+                            alt="Minh họa vùng tiếp giáp lãnh hải"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 768px"
+                            className="object-contain"
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-center text-gray-600 italic">
+                          Tăng cường tuần tra, kiểm soát để bảo vệ chủ quyền và lợi ích quốc gia trên biển.
+                        </p>
+                      </div>
+                    </div>
+                  ) : item.id === 'vung-dac-quyen' ? (
+                    <div className="max-w-4xl mx-auto font-sans space-y-4">
+                      <div className="bg-gradient-to-r from-sky-700 to-blue-800 text-white p-5 rounded-2xl shadow-lg border-l-8 border-blue-300">
+                        <h4 className="text-xl font-bold mb-2">⚖️ Cơ sở pháp lý</h4>
+                        <p className="text-white/95">Theo Luật số 18/2012/QH13 - Luật Biển Việt Nam năm 2012.</p>
+                      </div>
+
+                      <div className="bg-blue-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">🌊 Điều 15 - Vùng đặc quyền kinh tế</h4>
+                        <p className="text-gray-700">
+                          Vùng đặc quyền kinh tế là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, hợp với lãnh hải thành một vùng biển có chiều rộng
+                          200 hải lý tính từ đường cơ sở.
+                        </p>
+                      </div>
+
+                      <div className="bg-indigo-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">🧭 Điều 17 - Thềm lục địa</h4>
+                        <p className="text-gray-700">
+                          Thềm lục địa là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự
+                          nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến mép ngoài của rìa lục địa.
+                        </p>
+                      </div>
+
+                      <div className="bg-emerald-50 p-4 rounded-xl shadow">
+                        <h4 className="font-semibold text-lg mb-2">✅ Quyền của quốc gia ven biển</h4>
+                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
+                          <li>Quyền chủ quyền về thăm dò, khai thác, bảo tồn và quản lý tài nguyên thiên nhiên.</li>
+                          <li>Quyền tài phán về lắp đặt công trình, nghiên cứu khoa học biển, bảo vệ môi trường biển.</li>
+                          <li>Các quyền và nghĩa vụ khác theo Công ước Luật Biển 1982.</li>
+                        </ul>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="relative w-full aspect-[16/9] rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
+                          <Image
+                            src="/vungdacquyen.png"
+                            alt="Minh họa vùng đặc quyền kinh tế và thềm lục địa"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 768px"
+                            className="object-contain"
+                            priority
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-center text-gray-600 italic">
+                          Khẳng định quyền chủ quyền của Việt Nam trong vùng đặc quyền kinh tế và thềm lục địa.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-line leading-relaxed">
+                      {item.content}
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
