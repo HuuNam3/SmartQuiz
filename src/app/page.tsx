@@ -47,14 +47,6 @@ export default function Home() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // const handleOpenVerifyDialog = () => {
-  //   if (user) {
-  //     setEditClassId(user.classId)
-  //     setEditGroup(user.group || '')
-  //     setShowVerifyDialog(true)
-  //   }
-  // }
-
   const handleEditInfo = async () => {
     if (!editGroup) {
       toast.warning('vui lòng chọn nhóm!')
