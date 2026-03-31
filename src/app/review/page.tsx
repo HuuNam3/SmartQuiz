@@ -417,7 +417,7 @@ export default function ReviewPage() {
           className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
           onClick={() => router.push('/')}
         >
-          quay về làm bài trắc nghiệm
+          Quay về làm bài trắc nghiệm
         </Button>
       </div>
       </div>
