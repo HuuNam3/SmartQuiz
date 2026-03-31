@@ -71,6 +71,7 @@ export default function Home() {
         group: editGroup
       })
 
+
       setShowVerifyDialog(false)
       setIsEditMode(false)
       toast.success('cập nhật thông tin thành công!')
@@ -209,6 +210,9 @@ export default function Home() {
       setPendingUser(null)
       toast.success('xác nhận thông tin thành công!')
       fetchUsers()
+      if(classId !== 'admin333') {
+        router.push('/review')
+      }
     } catch (error) {
       console.error("Failed to verify profile:", error);
       toast.error('xác nhận thông tin thất bại!')
