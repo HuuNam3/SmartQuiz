@@ -412,14 +412,14 @@ export default function ReviewPage() {
         </Card>
 
         <div className="mt-8 flex justify-center">
-        <Button
-          size="lg"
-          className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
-          onClick={() => router.push('/')}
-        >
-          Quay về làm bài trắc nghiệm
-        </Button>
-      </div>
+          <Button
+            size="lg"
+            className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
+            onClick={() => router.push('/consolidation')}
+          >
+            Làm bài tập vượt các trạm
+          </Button>
+        </div>
       </div>
     </div>
   )

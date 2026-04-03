@@ -52,7 +52,10 @@ export default function RootLayout({
           <main className="flex-1">
             {children}
           </main>
-          <Toaster />
+          <Toaster
+            position="top-right"
+            closeButton
+          />
           <Footer />
         </UserProvider>
         {/* <Analytics /> */}

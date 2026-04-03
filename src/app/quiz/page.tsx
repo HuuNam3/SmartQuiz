@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { CheckCircle2, Clock, BookOpen, ChevronLeft, ChevronRight, Send, Trophy, Zap, Brain, Star, Flame, Target } from 'lucide-react'
 
 // Ngân hàng 10 câu hỏi
 const allQuestions = [
@@ -112,7 +113,6 @@ export default function QuizPage() {
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [isTimeUp, setIsTimeUp] = useState(false)
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
-  const [isReviewing, setIsReviewing] = useState(false)
   const router = useRouter()
   const { user, setUser, fetchUsers } = useUser()
 
@@ -211,6 +211,8 @@ export default function QuizPage() {
   const handleNext = () => {
     if (currentQuestion < quizzes.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
+    } else {
+      setCurrentQuestion(0)
     }
   }
 
@@ -222,11 +224,6 @@ export default function QuizPage() {
 
   const handleGoToQuestion = (index: number) => {
     setCurrentQuestion(index)
-  }
-
-  const handleReview = () => {
-    setIsReviewing(true)
-    setCurrentQuestion(0)
   }
 
   const handleSubmitClick = () => {
@@ -278,48 +275,150 @@ export default function QuizPage() {
   const answeredCount = answers.filter(a => a !== null).length
   const unansweredCount = quizzes.length - answeredCount
 
+  // Confetti effect
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (user.endTime && user.score >= 5 && canvasRef.current) {
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+
+      const particles: Array<{
+        x: number
+        y: number
+        vx: number
+        vy: number
+        life: number
+        color: string
+      }> = []
+
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: -10,
+          vx: (Math.random() - 0.5) * 8,
+          vy: Math.random() * 8 + 4,
+          life: 1,
+          color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'][
+            Math.floor(Math.random() * 5)
+          ],
+        })
+      }
+
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        particles.forEach((p) => {
+          p.y += p.vy
+          p.vy += 0.2
+          p.life -= 0.01
+
+          ctx.fillStyle = p.color
+          ctx.globalAlpha = p.life
+          ctx.fillRect(p.x, p.y, 8, 8)
+        })
+
+        if (particles.some((p) => p.life > 0)) {
+          requestAnimationFrame(animate)
+        }
+      }
+
+      animate()
+    }
+  }, [user.endTime, user.score])
+
   // Nếu đã hoàn thành bài trắc nghiệm, hiển thị thông báo
   if (user.endTime) {
     const resultPercentage = (user.score / MAX_SCORE) * 100
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="p-8 text-center shadow-lg">
-            <div className="mb-6">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 flex items-center justify-center relative overflow-hidden">
+        {user.score >= 5 && (
+          <canvas
+            ref={canvasRef}
+            className="fixed inset-0 pointer-events-none"
+            style={{ zIndex: 10 }}
+          />
+        )}
+        <div className="max-w-2xl mx-auto w-full relative z-20">
+          <Card className="p-8 text-center shadow-lg border-0 relative overflow-hidden bg-white">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-100 to-transparent rounded-full blur-3xl opacity-50"></div>
+            <div className="relative z-10">
+              <div className="mb-6">
+                {user.score >= 5 ? (
+                  <div className="animate-bounce">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                      <Star className="w-12 h-12 text-white animate-spin" />
+                    </div>
+                  </div>
+                ) : user.score >= 3 ? (
+                  <div className="animate-pulse">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg">
+                      <Target className="w-12 h-12 text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
+                      <Trophy className="w-12 h-12 text-white" />
+                    </div>
+                  </div>
+                )}
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Bạn đã hoàn thành bài trắc nghiệm!</h2>
-              <p className="text-gray-600">Mỗi học sinh chỉ được làm bài 1 lần.</p>
-            </div>
 
-            <div className="p-6 bg-gray-50 rounded-lg mb-6">
-              <p className="text-lg text-gray-600 mb-2">Kết quả của bạn:</p>
-              <div className={cn(
-                "text-5xl font-bold mb-2",
-                resultPercentage >= 80 ? "text-green-600" :
-                  resultPercentage >= 50 ? "text-amber-600" : "text-red-600"
-              )}>
-                {user.score}/{MAX_SCORE}
-              </div>
-              <div className={cn(
-                "inline-block px-4 py-2 rounded-full text-sm font-semibold",
-                resultPercentage >= 80 ? "bg-green-100 text-green-700" :
-                  resultPercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-              )}>
-                {resultPercentage >= 80 ? "Xuất sắc!" :
-                  resultPercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
-              </div>
-            </div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                Hoàn thành bài trắc nghiệm!
+              </h2>
+              {user.score >= 5 && (
+                <p className="text-lg font-bold text-yellow-600 mb-2">Xuất sắc! 🎉</p>
+              )}
+              <p className="text-gray-500 text-sm">Mỗi học sinh chỉ được làm bài 1 lần</p>
 
-            <Button
-              onClick={handleGoToProfile}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg"
-            >
-              Xem hồ sơ học sinh
-            </Button>
+              <div className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl mb-6 mt-8 border border-blue-200">
+                <p className="text-sm text-gray-600 font-medium mb-3">KẾT QUẢ CỦA BẠN</p>
+                <div className={cn(
+                  "text-6xl font-black mb-3 text-balance",
+                  user.score >= 5 ? "bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
+                    user.score >= 3 ? "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent" :
+                    "bg-gradient-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
+                )}>
+                  {user.score}/{MAX_SCORE}
+                </div>
+                <div className={cn(
+                  "inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold",
+                  user.score >= 5 ? "bg-yellow-100 text-yellow-700" :
+                    user.score >= 3 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"
+                )}>
+                  {user.score >= 5 ? (
+                    <>
+                      <Flame className="w-4 h-4" />
+                      Xuất sắc!
+                    </>
+                  ) : user.score >= 3 ? (
+                    <>
+                      <Target className="w-4 h-4" />
+                      Khá tốt!
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" />
+                      Cố gắng lên!
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <Button
+                onClick={handleGoToProfile}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+              >
+                <BookOpen className="w-5 h-5 mr-2" />
+                Xem hồ sơ học sinh
+              </Button>
+            </div>
           </Card>
         </div>
       </div>
@@ -330,20 +429,26 @@ export default function QuizPage() {
   const scorePercentage = (score / quizzes.length) * 100
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 text-center mb-4">Trắc Nghiệm</h1>
-          <p className="text-center text-gray-600 mb-4">
-            Học sinh: <span className="font-semibold text-blue-600">{user.name}</span> - Lớp: <span className="font-semibold text-blue-600">{user.class}</span>
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Brain className="w-8 h-8 text-blue-600" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Trắc Nghiệm Chuyên Đề</h1>
+          </div>
+          <div className="flex items-center justify-center gap-4 text-gray-700">
+            <span>👤 <span className="font-semibold text-blue-600">{user.name}</span></span>
+            <span className="text-gray-400">•</span>
+            <span>📚 <span className="font-semibold text-blue-600">Lớp {user.class}</span></span>
+          </div>
         </div>
 
         {isTimeUp && !showScore ? (
           <Card className="p-8 text-center shadow-lg bg-red-50 border-2 border-red-300">
-            <h2 className="text-3xl font-bold text-red-600 mb-6">Hết thời gian!</h2>
-            <p className="text-lg text-gray-700 mb-8">
-              Thời gian làm bài 6 phút của bạn đã hết. Bài làm của bạn sẽ được nộp tự động.
+            <Clock className="w-16 h-16 text-red-500 mx-auto mb-4 animate-spin" />
+            <h2 className="text-3xl font-bold text-red-700 mb-4">Hết thời gian!</h2>
+            <p className="text-lg text-red-600 mb-8">
+              ⏰ Thời gian làm bài của bạn đã kết thúc. Bài làm sẽ được nộp tự động.
             </p>
             <Button
               onClick={() => {
@@ -354,42 +459,44 @@ export default function QuizPage() {
                 })
                 setShowScore(true)
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300"
             >
               Xem Kết Quả
             </Button>
           </Card>
         ) : showScore ? (
-          <Card className="p-8 text-center shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Kết quả của bạn</h2>
-            <p className="text-lg text-gray-600 mb-6">
-              {user.name} - Lớp {user.class}
+          <Card className="p-8 text-center shadow-lg bg-white border-0">
+            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
+            <h2 className="text-4xl font-bold text-gray-800 mb-2">Kết quả của bạn</h2>
+            <p className="text-lg text-gray-600 mb-8">
+              {user.name} • Lớp {user.class}
             </p>
-            <div className="mb-8">
+            <div className="mb-8 p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
               <div className={cn(
-                "text-7xl font-bold mb-4",
+                "text-7xl font-black mb-4",
                 scorePercentage >= 80 ? "text-green-600" :
-                  scorePercentage >= 50 ? "text-amber-600" : "text-red-600"
+                  scorePercentage >= 50 ? "text-amber-600" : "text-blue-600"
               )}>
                 {score}/{quizzes.length}
               </div>
-              <p className="text-xl text-gray-600 mb-4">
-                Bạn trả lời đúng {score} trong {quizzes.length} câu hỏi
+              <p className="text-lg text-gray-700 mb-4">
+                ✓ Bạn trả lời đúng <span className="font-bold text-green-600">{score}</span> trong <span className="font-bold text-blue-600">{quizzes.length}</span> câu
               </p>
               <div className={cn(
-                "inline-block px-6 py-3 rounded-full text-lg font-semibold",
+                "inline-flex items-center gap-2 px-6 py-3 rounded-full text-base font-bold",
                 scorePercentage >= 80 ? "bg-green-100 text-green-700" :
-                  scorePercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                  scorePercentage >= 50 ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
               )}>
-                {scorePercentage >= 80 ? "Xuất sắc!" :
-                  scorePercentage >= 50 ? "Khá tốt!" : "Cần cố gắng thêm!"}
+                {scorePercentage >= 80 ? "🎉 Xuất sắc!" :
+                  scorePercentage >= 50 ? "👍 Khá tốt!" : "💪 Cố gắng lên!"}
               </div>
             </div>
 
             <Button
               onClick={handleGoToProfile}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
             >
+              <BookOpen className="w-5 h-5 mr-2" />
               Xem hồ sơ học sinh
             </Button>
           </Card>
@@ -397,19 +504,22 @@ export default function QuizPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Sidebar - Question Navigator */}
             <div className="lg:col-span-1 order-2 lg:order-1">
-              <Card className="p-4 shadow-lg sticky top-4">
-                <h3 className="font-semibold text-gray-700 mb-4 text-center">Danh sách câu hỏi</h3>
-                <div className="grid grid-cols-4 gap-4 mb-4">
+              <Card className="p-5 shadow-lg sticky top-4 bg-white border-blue-200 border">
+                <h3 className="font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  Danh sách câu
+                </h3>
+                <div className="grid grid-cols-4 gap-3 mb-6">
                   {quizzes.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => handleGoToQuestion(index)}
                       className={cn(
-                        "w-10 h-10 rounded-lg font-medium text-sm transition-all duration-200",
+                        "w-11 h-11 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-110",
                         currentQuestion === index
-                          ? "bg-blue-600 text-white ring-2 ring-blue-300"
+                          ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white ring-2 ring-blue-300 shadow-md"
                           : answers[index] !== null
-                            ? "bg-green-100 text-green-700 border border-green-300"
+                            ? "bg-gradient-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       )}
                     >
@@ -418,30 +528,25 @@ export default function QuizPage() {
                   ))}
                 </div>
 
-                <div className="text-sm text-gray-600 space-y-1 border-t pt-3">
+                <div className="text-sm text-gray-700 space-y-2 border-t border-gray-200 pt-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-green-100 border border-green-300"></div>
-                    <span>Đã trả lời ({answeredCount})</span>
+                    <div className="w-5 h-5 rounded bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                    </div>
+                    <span>Đã trả lời (<span className="font-bold text-green-600">{answeredCount}</span>)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-gray-100 border border-gray-300"></div>
-                    <span>Chưa trả lời ({unansweredCount})</span>
+                    <div className="w-5 h-5 rounded bg-gray-200"></div>
+                    <span>Chưa trả lời (<span className="font-bold text-orange-600">{unansweredCount}</span>)</span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t space-y-2">
-                  <Button
-                    onClick={handleReview}
-                    variant="outline"
-                    className="w-full"
-                    disabled={answeredCount === 0}
-                  >
-                    Kiểm tra lại
-                  </Button>
+                <div className="mt-5 pt-5 border-t border-gray-200">
                   <Button
                     onClick={handleSubmitClick}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold shadow-md transition-all duration-300"
                   >
+                    <Send className="w-4 h-4 mr-2" />
                     Nộp bài
                   </Button>
                 </div>
@@ -450,61 +555,58 @@ export default function QuizPage() {
 
             {/* Main Question Area */}
             <div className="lg:col-span-3 order-1 lg:order-2">
-              <Card className="p-8 shadow-lg">
-                <div className="mb-6">
+              <Card className="p-8 shadow-lg bg-white border-blue-200 border">
+                <div className="mb-8">
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex gap-4 items-center">
-                      <span className="text-sm font-medium text-gray-600">
+                      <span className="text-sm font-bold text-white bg-blue-600 px-3 py-1 rounded-full">
                         Câu {currentQuestion + 1}/{quizzes.length}
                       </span>
-                      <div className="w-48 h-2 bg-gray-200 rounded-full">
+                      <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                         <div
-                          className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500 shadow-md"
                           style={{ width: `${((currentQuestion + 1) / quizzes.length) * 100}%` }}
                         ></div>
                       </div>
                     </div>
-                    <div className={`text-lg font-bold px-4 py-2 rounded-lg ${timeLeft <= 60
-                      ? 'bg-red-100 text-red-700 animate-pulse'
-                      : 'bg-blue-100 text-blue-700'
-                      }`}>
+                    <div className={cn(
+                      "text-lg font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300",
+                      timeLeft <= 60
+                        ? 'bg-red-100 text-red-700 animate-pulse border-2 border-red-300'
+                        : 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                    )}>
+                      <Clock className="w-5 h-5" />
                       {formatTime(timeLeft)}
                     </div>
                   </div>
-                  <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                     <div
-                      className={`h-full transition-all duration-300 ${timePercentage > 20 ? 'bg-green-500' : 'bg-red-500'
-                        }`}
+                      className={cn(
+                        "h-full transition-all duration-500",
+                        timePercentage > 20 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500'
+                      )}
                       style={{ width: `${timePercentage}%` }}
                     ></div>
                   </div>
                 </div>
 
-                {isReviewing && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-lg">
-                    <p className="text-amber-700 text-sm font-medium">
-                      Chế độ kiểm tra - Bạn có thể thay đổi đáp án trước khi nộp bài
-                    </p>
-                  </div>
-                )}
-
-                <h2 className="text-xl font-bold text-gray-800 mb-6">
-                  Câu {currentQuestion + 1}: {quizzes[currentQuestion].question}
+                <h2 className="text-2xl font-bold text-gray-800 mb-8 leading-relaxed">
+                  <span className="text-blue-600">Câu {currentQuestion + 1}:</span> {quizzes[currentQuestion].question}
                 </h2>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-10">
                   {quizzes[currentQuestion].options.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleAnswerClick(index)}
                       className={cn(
-                        "w-full p-4 text-left rounded-lg font-medium transition-all duration-200 border-2",
+                        "w-full p-5 text-left rounded-lg font-semibold transition-all duration-200 border-2 transform hover:scale-102 hover:shadow-md",
                         answers[currentQuestion] === index
-                          ? "bg-blue-100 border-blue-500 text-blue-800"
-                          : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                          ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-400 text-white shadow-md ring-2 ring-blue-300"
+                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 hover:border-gray-300"
                       )}
                     >
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-700 mr-3 text-sm font-bold">
+                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600 mr-4 text-base font-bold">
                         {String.fromCharCode(65 + index)}
                       </span>
                       {option}
@@ -512,21 +614,22 @@ export default function QuizPage() {
                   ))}
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-4">
                   <Button
                     onClick={handlePrev}
                     disabled={currentQuestion === 0}
+                    className="px-8 bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300 border disabled:opacity-50"
                     variant="outline"
-                    className="px-6"
                   >
+                    <ChevronLeft className="w-5 h-5 mr-2" />
                     Câu trước
                   </Button>
                   <Button
                     onClick={handleNext}
-                    disabled={currentQuestion === quizzes.length - 1}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                    className="px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-md transition-all duration-300"
                   >
                     Câu tiếp
+                    <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>
                 </div>
               </Card>
@@ -537,25 +640,33 @@ export default function QuizPage() {
 
       {/* Submit Confirmation Dialog */}
       <AlertDialog open={showSubmitConfirm} onOpenChange={setShowSubmitConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white border-blue-200 border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">Xác nhận nộp bài</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl text-gray-800 flex items-center gap-2">
+              <Send className="w-6 h-6 text-blue-600" />
+              Xác nhận nộp bài
+            </AlertDialogTitle>
             <AlertDialogDescription className="sr-only">
               Xác nhận nộp bài trắc nghiệm
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="text-base space-y-3 text-muted-foreground">
-            <span className="block">Bạn đã trả lời <strong className="text-blue-600">{answeredCount}/{quizzes.length}</strong> câu hỏi.</span>
-            {unansweredCount > 0 && (
-              <span className="block text-amber-600 font-medium">
-                Còn {unansweredCount} câu chưa trả lời. Bạn có muốn tiếp tục nộp bài?
-              </span>
-            )}
-            <span className="block text-gray-600">Sau khi nộp bài, bạn không thể thay đổi đáp án.</span>
+          <div className="text-base space-y-4 text-gray-700">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <span className="block">✓ Bạn đã trả lời <strong className="text-green-600">{answeredCount}/{quizzes.length}</strong> câu hỏi.</span>
+              {unansweredCount > 0 && (
+                <span className="block text-amber-600 font-medium mt-2">
+                  ⚠️ Còn {unansweredCount} câu chưa trả lời. Bạn có muốn tiếp tục nộp bài?
+                </span>
+              )}
+              <span className="block text-red-600 text-sm">🔒 Sau khi nộp bài, bạn không thể thay đổi đáp án.</span>
+            </div>
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Quay lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-green-600 hover:bg-green-700">
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300">
+              ← Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold">
+              <Send className="w-4 h-4 mr-2" />
               Nộp bài
             </AlertDialogAction>
           </AlertDialogFooter>

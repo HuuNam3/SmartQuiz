@@ -29,6 +29,7 @@ export default function Navigation() {
   const links = [
     { href: '/', label: 'Trang chủ', protected: false, needsWarning: false },
     { href: '/review', label: 'Ôn tập', protected: true, needsWarning: false },
+    // { href: '/consolidation', label: 'Làm bài ôn tập', protected: false, needsWarning: false },
   ]
 
   // const visibleLinks = links.filter(link => {

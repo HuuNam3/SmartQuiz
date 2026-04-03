@@ -29,6 +29,8 @@ import {
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
+const QUIZ_ACCESS_CODE = 'OT123456'
+
 export default function Home() {
   const [classId, setClassId] = useState('')
   const [group, setGroup] = useState('')
@@ -40,8 +42,12 @@ export default function Home() {
   const [editGroup, setEditGroup] = useState('')
   const [pendingUser, setPendingUser] = useState<UserType | null>(null)
   const [, setVerifyMode] = useState<'login' | 'profile'>('login')
+  const [showAccessCodeDialog, setShowAccessCodeDialog] = useState(false)
+  const [accessCode, setAccessCode] = useState('')
+  const [accessError, setAccessError] = useState('')
   const router = useRouter()
   const { fetchUsers, user, users, clearUser, setUser } = useUser()
+
 
   useEffect(() => {
     fetchUsers();
@@ -210,7 +216,7 @@ export default function Home() {
       setPendingUser(null)
       toast.success('xác nhận thông tin thành công!')
       fetchUsers()
-      if(classId !== 'admin333') {
+      if (classId !== 'admin333') {
         router.push('/review')
       }
     } catch (error) {
@@ -234,18 +240,31 @@ export default function Home() {
     router.push('/profile')
   }
 
-  const handleConfirmQuiz = async () => {
-    if (user?.startTime) {
-      setShowQuizWarning(false)
-      router.push('/quiz')
+  const handleConfirmQuiz = () => {
+    setShowQuizWarning(false)
+    setShowAccessCodeDialog(true)
+  }
+
+  const handleVerifyAccessCode = async () => {
+
+    if (accessCode !== QUIZ_ACCESS_CODE) {
+      toast.warning('Mã chưa chính xác!')
       return
     }
+
     try {
+      if (user?.startTime) {
+        setShowAccessCodeDialog(false)
+        router.push('/quiz')
+        return
+      }
+
       const data: UserType = {
         ...user!,
         startTime: Date.now(),
         score: 0,
       }
+
       await fetch(`/api/users`, {
         method: "PUT",
         headers: {
@@ -256,12 +275,18 @@ export default function Home() {
           score: 0,
           first: true,
         }),
-      });
+      })
+
       setUser(data)
-      setShowQuizWarning(false)
+
+      setShowAccessCodeDialog(false)
+      setAccessCode('')
+      setAccessError('')
+
       router.push('/quiz')
+
     } catch (error) {
-      console.error("Failed to save profile:", error);
+      console.error("Failed to save profile:", error)
     }
   }
 
@@ -293,6 +318,75 @@ export default function Home() {
               <AlertDialogAction onClick={handleConfirmQuiz} className="bg-blue-600 hover:bg-blue-700">
                 Bắt đầu làm bài
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {showAccessCodeDialog && (
+        <AlertDialog
+          open={showAccessCodeDialog}
+          onOpenChange={setShowAccessCodeDialog}
+        >
+          <AlertDialogContent className="sm:max-w-md rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl text-blue-600 text-center">
+                Nhập mã để bắt đầu làm bài
+              </AlertDialogTitle>
+
+              <AlertDialogDescription className="sr-only">
+                Nhập mã truy cập trước khi làm bài
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4">
+
+              <Input
+                placeholder="Nhập mã truy cập..."
+                value={accessCode}
+                onChange={(e) => {
+                  setAccessCode(e.target.value)
+                  setAccessError('')
+                }}
+                className="
+            text-center
+            text-lg
+            font-semibold
+            tracking-widest
+          "
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleVerifyAccessCode()
+                  }
+                }}
+              />
+
+              {accessError && (
+                <p className="text-red-600 text-sm text-center font-medium">
+                  {accessError}
+                </p>
+              )}
+
+            </div>
+
+            <AlertDialogFooter>
+
+              <AlertDialogCancel
+                onClick={() => {
+                  setAccessCode('')
+                  setAccessError('')
+                }}
+              >
+                Hủy
+              </AlertDialogCancel>
+
+              <AlertDialogAction
+                onClick={handleVerifyAccessCode}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Xác nhận
+              </AlertDialogAction>
+
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
