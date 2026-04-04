@@ -15,6 +15,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Send, AlertCircle } from 'lucide-react'
+import { useUser } from '@/context/user-context'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface StationQuestion {
   id: string
@@ -249,12 +252,21 @@ export default function ConsolidationPage() {
   const [failedStations, setFailedStations] = useState<Record<number, boolean>>({})
   const [showResultModal, setShowResultModal] = useState(false)
   const [stationPassed, setStationPassed] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const dragRef = useRef<{ draggedItem: string; sourceIndex: number } | null>(null)
+  const router = useRouter()
+  const { user } = useUser()
 
   const station = stationsData[currentStation]
   const question = station.questions[currentQuestion]
   // const answerKey = `s${currentStation}q${currentQuestion}`
   const currentAnswer = answers[currentStation]?.[question.id] || ''
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/')
+    }
+  }, [user, router])
 
   useEffect(() => {
     const savedAnswer =
@@ -278,6 +290,55 @@ export default function ConsolidationPage() {
       }
     }
   }, [currentStation, currentQuestion, answers, question.id, question.type])
+
+  useEffect(() => {
+    if (!user) return
+
+    const failed: Record<number, boolean> = {}
+    const submitted: Record<number, boolean> = {}
+
+    // Nếu có endStep -> fail tại trạm đó
+    if (user.endStep) {
+      const step = Number(user.endStep) || 1
+
+      const unlocked: number[] = Array.from(
+        { length: step },
+        (_, i) => i
+      )
+
+      // các trạm trước đó đã submit
+      unlocked.forEach((i) => {
+        submitted[i] = true
+      })
+
+      // chỉ khóa đúng trạm fail
+      failed[step - 1] = true
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUnlockedStations(unlocked)
+      setFailedStations(failed)
+      setSubmittedStations(submitted)
+
+      return
+    }
+
+    // Không fail -> dùng passStep
+    const step = Number(user.passStep) || 1
+
+    const unlocked: number[] = Array.from(
+      { length: step },
+      (_, i) => i
+    )
+
+    // các trạm đã unlock coi như đã submit
+    for (let i = 0; i < step - 1; i++) {
+      submitted[i] = true
+    }
+
+    setUnlockedStations(unlocked)
+    setSubmittedStations(submitted)
+
+  }, [user])
 
   const handleAnswer = (answer: string | string[]) => {
     setAnswers((prev) => ({
@@ -352,6 +413,9 @@ export default function ConsolidationPage() {
 
       setShowUnlockDialog(false)
       setUnlockCode('')
+      toast.success('Đã mở khóa trạm tiếp theo!')
+    } else {
+      toast.warning('Mã mở khóa chưa đúng!')
     }
   }
 
@@ -385,22 +449,16 @@ export default function ConsolidationPage() {
 
     setStationPassed(passed)
     setShowResultModal(true)
-
-    if (passed) {
-      setSubmittedStations((prev) => ({
-        ...prev,
-        [currentStation]: true,
-      }))
-
-      // cho phép nhập mã
-      // setShowUnlockDialog(true)
-
-    } else {
+    if (!passed) {
       setFailedStations((prev) => ({
         ...prev,
         [currentStation]: true,
       }))
     }
+    setSubmittedStations((prev) => ({
+      ...prev,
+      [currentStation]: true,
+    }))
   }
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4">
@@ -419,10 +477,6 @@ export default function ConsolidationPage() {
         {/* Stations Navigation */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           {stationsData.map((st, idx) => {
-            // const stationAnswers = answers[idx] || {}
-            // const correct = st.questions.filter(
-            //   (q) => stationAnswers[q.id] === q.answers || stationAnswers[q.id] === q.correctItems
-            // ).length
             const isUnlocked = unlockedStations.includes(idx)
             const isFailed = failedStations[idx]
             const isPassed = submittedStations[idx]
@@ -514,21 +568,23 @@ export default function ConsolidationPage() {
                     <span>Chưa trả lời ({station.questions.length - Object.keys(answers[currentStation] || {}).length})</span>
                   </div>
                 </div>
-
-                <Button
-                  onClick={() => setShowUnlockDialog(true)}
-                  disabled={
-                    !submittedStations[currentStation] ||
-                    correctAnswersCount < 4
-                  }
-                  className="w-full mt-5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold"
-                >
-                  {submittedStations[currentStation]
-                    ? correctAnswersCount >= 4
-                      ? 'Mở Khóa Trạm'
-                      : 'Chưa đạt'
-                    : 'Nộp bài trước'}
-                </Button>
+                {currentStation === 3 ?
+                  <Button
+                    onClick={() => { router.push('/') }}
+                    className="w-full mt-5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold"
+                  >
+                    Quay về làm bài trắc nghiệm ôn tập
+                  </Button>
+                  : <Button
+                    onClick={() => { setShowUnlockDialog(true) }}
+                    disabled={!submittedStations[currentStation] || unlockedStations.includes(currentStation + 1) || failedStations[currentStation]}
+                    className="w-full mt-5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold"
+                  >
+                    {!submittedStations[currentStation]
+                      ? 'Nộp bài trước'
+                      : 'Mở khóa trạm'}
+                  </Button>
+                }
               </Card>
             </div>
 
@@ -650,7 +706,7 @@ export default function ConsolidationPage() {
                   </div>
 
                   <Button
-                    onClick={handleSubmitStation}
+                    onClick={() => setShowSubmitDialog(true)}
                     disabled={submittedStations[currentStation]}
                     className="w-full bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -727,6 +783,50 @@ export default function ConsolidationPage() {
                 Mở Khóa
               </AlertDialogAction>
             </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={showSubmitDialog}
+          onOpenChange={setShowSubmitDialog}
+        >
+          <AlertDialogContent>
+
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Xác nhận nộp bài
+              </AlertDialogTitle>
+
+              <AlertDialogDescription>
+                Bạn đã trả lời đúng:
+
+                <span className="font-bold text-green-600 ml-1">
+                  {correctAnswersCount}/5 câu
+                </span>
+
+                <br />
+                Bạn chỉ được nộp bài một lần.
+                Bạn có chắc chắn muốn nộp bài?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+
+              <AlertDialogCancel>
+                Hủy
+              </AlertDialogCancel>
+
+              <AlertDialogAction
+                onClick={() => {
+                  handleSubmitStation()
+                  setShowSubmitDialog(false)
+                }}
+              >
+                Xác nhận nộp
+              </AlertDialogAction>
+
+            </AlertDialogFooter>
+
           </AlertDialogContent>
         </AlertDialog>
       </div>
