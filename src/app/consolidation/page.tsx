@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Target, Flame, Send, AlertCircle } from 'lucide-react'
+import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Send, AlertCircle } from 'lucide-react'
 
 interface StationQuestion {
   id: string
@@ -253,7 +253,7 @@ export default function ConsolidationPage() {
 
   const station = stationsData[currentStation]
   const question = station.questions[currentQuestion]
-  const answerKey = `s${currentStation}q${currentQuestion}`
+  // const answerKey = `s${currentStation}q${currentQuestion}`
   const currentAnswer = answers[currentStation]?.[question.id] || ''
 
   useEffect(() => {
@@ -262,6 +262,7 @@ export default function ConsolidationPage() {
 
     if (question.type === 'dragdrop') {
       if (!savedAnswer) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraggedItems({})
         return
       }
@@ -276,10 +277,7 @@ export default function ConsolidationPage() {
         })
       }
     }
-  }, [
-    currentStation,
-    currentQuestion,
-  ])
+  }, [currentStation, currentQuestion, answers, question.id, question.type])
 
   const handleAnswer = (answer: string | string[]) => {
     setAnswers((prev) => ({
@@ -325,8 +323,8 @@ export default function ConsolidationPage() {
       } else {
         return (
           Array.isArray(userAnswer) &&
-          userAnswer.length === q.correctItems.length &&
-          userAnswer.every((a) => q.correctItems.includes(a))
+          userAnswer.length === q.correctItems?.length &&
+          userAnswer.every((a) => q.correctItems?.includes(a))
         )
       }
     }
@@ -405,13 +403,13 @@ export default function ConsolidationPage() {
     }
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Brain className="w-8 h-8 text-blue-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Củng Cố Kiến Thức
             </h1>
           </div>
@@ -421,10 +419,10 @@ export default function ConsolidationPage() {
         {/* Stations Navigation */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           {stationsData.map((st, idx) => {
-            const stationAnswers = answers[idx] || {}
-            const correct = st.questions.filter(
-              (q) => stationAnswers[q.id] === q.answers || stationAnswers[q.id] === q.correctItems
-            ).length
+            // const stationAnswers = answers[idx] || {}
+            // const correct = st.questions.filter(
+            //   (q) => stationAnswers[q.id] === q.answers || stationAnswers[q.id] === q.correctItems
+            // ).length
             const isUnlocked = unlockedStations.includes(idx)
             const isFailed = failedStations[idx]
             const isPassed = submittedStations[idx]
@@ -438,9 +436,9 @@ export default function ConsolidationPage() {
                   'p-4 rounded-lg font-bold text-center transition-all duration-300 transform',
                   isFailed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105',
                   currentStation === idx
-                    ? `bg-gradient-to-br ${colorClasses[st.color as keyof typeof colorClasses]} text-white ring-2 ring-offset-2 ring-blue-300 shadow-lg`
+                    ? `bg-linear-to-br ${colorClasses[st.color as keyof typeof colorClasses]} text-white ring-2 ring-offset-2 ring-blue-300 shadow-lg`
                     : isPassed
-                      ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300 shadow-md'
+                      ? 'bg-linear-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300 shadow-md'
                       : isUnlocked
                         ? 'bg-white border-2 border-gray-200 text-gray-800 hover:border-blue-300'
                         : isFailed
@@ -495,9 +493,9 @@ export default function ConsolidationPage() {
                       className={cn(
                         'w-10 h-10 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-110',
                         currentQuestion === idx
-                          ? `bg-gradient-to-br ${colorClasses[station.color as keyof typeof colorClasses]} text-white ring-2 ring-blue-300 shadow-md`
+                          ? `bg-linear-to-br ${colorClasses[station.color as keyof typeof colorClasses]} text-white ring-2 ring-blue-300 shadow-md`
                           : answers[currentStation]?.[q.id]
-                            ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300'
+                            ? 'bg-linear-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       )}
                     >
@@ -508,7 +506,7 @@ export default function ConsolidationPage() {
 
                 <div className="text-sm text-gray-700 space-y-2 border-t border-gray-200 pt-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-gradient-to-br from-green-500 to-emerald-500"></div>
+                    <div className="w-4 h-4 rounded bg-linear-to-br from-green-500 to-emerald-500"></div>
                     <span>Đã trả lời ({Object.keys(answers[currentStation] || {}).length})</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -545,7 +543,7 @@ export default function ConsolidationPage() {
                     <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className={cn(
-                          'h-full bg-gradient-to-r rounded-full transition-all duration-500',
+                          'h-full bg-linear-to-r rounded-full transition-all duration-500',
                           `${colorClasses[station.color as keyof typeof colorClasses]}`
                         )}
                         style={{ width: `${((currentQuestion + 1) / station.questions.length) * 100}%` }}
@@ -568,7 +566,7 @@ export default function ConsolidationPage() {
                         {draggedItems['dropzone']?.map((item, idx) => (
                           <div
                             key={idx}
-                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-md"
+                            className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-md"
                           >
                             {item}
                             <button
@@ -593,7 +591,7 @@ export default function ConsolidationPage() {
                             onDragStart={() =>
                               handleDragStart(item, idx)
                             }
-                            className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg p-4 font-semibold text-gray-700 cursor-grab hover:cursor-grabbing hover:border-blue-400 transition-all duration-200 transform hover:shadow-md"
+                            className="bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg p-4 font-semibold text-gray-700 cursor-grab hover:cursor-grabbing hover:border-blue-400 transition-all duration-200 transform hover:shadow-md"
                           >
                             {item}
                           </div>
@@ -620,7 +618,7 @@ export default function ConsolidationPage() {
                         className={cn(
                           'w-full p-5 text-left rounded-lg font-semibold transition-all duration-200 border-2 transform hover:scale-102 hover:shadow-md',
                           currentAnswer === option.split('.')[0].trim()
-                            ? `bg-gradient-to-r ${colorClasses[station.color as keyof typeof colorClasses]} text-white border-transparent shadow-md`
+                            ? `bg-linear-to-r ${colorClasses[station.color as keyof typeof colorClasses]} text-white border-transparent shadow-md`
                             : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 hover:border-gray-300'
                         )}
                       >
@@ -654,7 +652,7 @@ export default function ConsolidationPage() {
                   <Button
                     onClick={handleSubmitStation}
                     disabled={submittedStations[currentStation]}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-5 h-5 mr-2" />
                     {submittedStations[currentStation] ? 'Đã nộp bài' : 'Nộp Trạm'}
@@ -671,7 +669,7 @@ export default function ConsolidationPage() {
             <div className="text-center">
               {stationPassed ? (
                 <div className="mb-6 animate-bounce">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
                     <Star className="w-10 h-10 text-white animate-spin" />
                   </div>
                 </div>

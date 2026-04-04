@@ -198,6 +198,61 @@ export default function QuizPage() {
     submitQuiz()
   }, [isTimeUp, calculateScore, user, fetchUsers])
 
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (user?.endTime && user?.score >= 5 && canvasRef.current) {
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+
+      const particles: Array<{
+        x: number
+        y: number
+        vx: number
+        vy: number
+        life: number
+        color: string
+      }> = []
+
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: -10,
+          vx: (Math.random() - 0.5) * 8,
+          vy: Math.random() * 8 + 4,
+          life: 1,
+          color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'][
+            Math.floor(Math.random() * 5)
+          ],
+        })
+      }
+
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        particles.forEach((p) => {
+          p.y += p.vy
+          p.vy += 0.2
+          p.life -= 0.01
+
+          ctx.fillStyle = p.color
+          ctx.globalAlpha = p.life
+          ctx.fillRect(p.x, p.y, 8, 8)
+        })
+
+        if (particles.some((p) => p.life > 0)) {
+          requestAnimationFrame(animate)
+        }
+      }
+
+      animate()
+    }
+  }, [user?.endTime, user?.score])
+
   if (!user) {
     return null
   }
@@ -275,67 +330,10 @@ export default function QuizPage() {
   const answeredCount = answers.filter(a => a !== null).length
   const unansweredCount = quizzes.length - answeredCount
 
-  // Confetti effect
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    if (user.endTime && user.score >= 5 && canvasRef.current) {
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-
-      const particles: Array<{
-        x: number
-        y: number
-        vx: number
-        vy: number
-        life: number
-        color: string
-      }> = []
-
-      for (let i = 0; i < 100; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: -10,
-          vx: (Math.random() - 0.5) * 8,
-          vy: Math.random() * 8 + 4,
-          life: 1,
-          color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'][
-            Math.floor(Math.random() * 5)
-          ],
-        })
-      }
-
-      const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-        particles.forEach((p) => {
-          p.y += p.vy
-          p.vy += 0.2
-          p.life -= 0.01
-
-          ctx.fillStyle = p.color
-          ctx.globalAlpha = p.life
-          ctx.fillRect(p.x, p.y, 8, 8)
-        })
-
-        if (particles.some((p) => p.life > 0)) {
-          requestAnimationFrame(animate)
-        }
-      }
-
-      animate()
-    }
-  }, [user.endTime, user.score])
-
   // Nếu đã hoàn thành bài trắc nghiệm, hiển thị thông báo
   if (user.endTime) {
-    const resultPercentage = (user.score / MAX_SCORE) * 100
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4 flex items-center justify-center relative overflow-hidden">
         {user.score >= 5 && (
           <canvas
             ref={canvasRef}
@@ -345,31 +343,31 @@ export default function QuizPage() {
         )}
         <div className="max-w-2xl mx-auto w-full relative z-20">
           <Card className="p-8 text-center shadow-lg border-0 relative overflow-hidden bg-white">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-100 to-transparent rounded-full blur-3xl opacity-50"></div>
+            <div className="absolute top-0 right-0 w-40 h-40 bg-linear-to-bl from-purple-100 to-transparent rounded-full blur-3xl opacity-50"></div>
             <div className="relative z-10">
               <div className="mb-6">
                 {user.score >= 5 ? (
                   <div className="animate-bounce">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
                       <Star className="w-12 h-12 text-white animate-spin" />
                     </div>
                   </div>
                 ) : user.score >= 3 ? (
                   <div className="animate-pulse">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg">
                       <Target className="w-12 h-12 text-white" />
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
                       <Trophy className="w-12 h-12 text-white" />
                     </div>
                   </div>
                 )}
               </div>
 
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              <h2 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                 Hoàn thành bài trắc nghiệm!
               </h2>
               {user.score >= 5 && (
@@ -377,13 +375,13 @@ export default function QuizPage() {
               )}
               <p className="text-gray-500 text-sm">Mỗi học sinh chỉ được làm bài 1 lần</p>
 
-              <div className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl mb-6 mt-8 border border-blue-200">
+              <div className="p-8 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl mb-6 mt-8 border border-blue-200">
                 <p className="text-sm text-gray-600 font-medium mb-3">KẾT QUẢ CỦA BẠN</p>
                 <div className={cn(
                   "text-6xl font-black mb-3 text-balance",
-                  user.score >= 5 ? "bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
-                    user.score >= 3 ? "bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent" :
-                    "bg-gradient-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
+                  user.score >= 5 ? "bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
+                    user.score >= 3 ? "bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent" :
+                    "bg-linear-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
                 )}>
                   {user.score}/{MAX_SCORE}
                 </div>
@@ -413,7 +411,7 @@ export default function QuizPage() {
 
               <Button
                 onClick={handleGoToProfile}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+                className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
                 Xem hồ sơ học sinh
@@ -429,12 +427,12 @@ export default function QuizPage() {
   const scorePercentage = (score / quizzes.length) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Brain className="w-8 h-8 text-blue-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Trắc Nghiệm Chuyên Đề</h1>
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Trắc Nghiệm Chuyên Đề</h1>
           </div>
           <div className="flex items-center justify-center gap-4 text-gray-700">
             <span>👤 <span className="font-semibold text-blue-600">{user.name}</span></span>
@@ -459,7 +457,7 @@ export default function QuizPage() {
                 })
                 setShowScore(true)
               }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300"
+              className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300"
             >
               Xem Kết Quả
             </Button>
@@ -471,7 +469,7 @@ export default function QuizPage() {
             <p className="text-lg text-gray-600 mb-8">
               {user.name} • Lớp {user.class}
             </p>
-            <div className="mb-8 p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+            <div className="mb-8 p-8 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
               <div className={cn(
                 "text-7xl font-black mb-4",
                 scorePercentage >= 80 ? "text-green-600" :
@@ -494,7 +492,7 @@ export default function QuizPage() {
 
             <Button
               onClick={handleGoToProfile}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+              className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
             >
               <BookOpen className="w-5 h-5 mr-2" />
               Xem hồ sơ học sinh
@@ -517,9 +515,9 @@ export default function QuizPage() {
                       className={cn(
                         "w-11 h-11 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-110",
                         currentQuestion === index
-                          ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white ring-2 ring-blue-300 shadow-md"
+                          ? "bg-linear-to-br from-purple-600 to-blue-600 text-white ring-2 ring-blue-300 shadow-md"
                           : answers[index] !== null
-                            ? "bg-gradient-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300"
+                            ? "bg-linear-to-br from-green-500 to-emerald-500 text-white border-2 border-green-300"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       )}
                     >
@@ -530,7 +528,7 @@ export default function QuizPage() {
 
                 <div className="text-sm text-gray-700 space-y-2 border-t border-gray-200 pt-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded bg-linear-to-br from-green-500 to-emerald-500 flex items-center justify-center">
                       <CheckCircle2 className="w-3 h-3 text-white" />
                     </div>
                     <span>Đã trả lời (<span className="font-bold text-green-600">{answeredCount}</span>)</span>
@@ -544,7 +542,7 @@ export default function QuizPage() {
                 <div className="mt-5 pt-5 border-t border-gray-200">
                   <Button
                     onClick={handleSubmitClick}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold shadow-md transition-all duration-300"
+                    className="w-full bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold shadow-md transition-all duration-300"
                   >
                     <Send className="w-4 h-4 mr-2" />
                     Nộp bài
@@ -564,7 +562,7 @@ export default function QuizPage() {
                       </span>
                       <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                         <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500 shadow-md"
+                          className="h-full bg-linear-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500 shadow-md"
                           style={{ width: `${((currentQuestion + 1) / quizzes.length) * 100}%` }}
                         ></div>
                       </div>
@@ -583,7 +581,7 @@ export default function QuizPage() {
                     <div
                       className={cn(
                         "h-full transition-all duration-500",
-                        timePercentage > 20 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500'
+                        timePercentage > 20 ? 'bg-linear-to-r from-green-500 to-emerald-500' : 'bg-linear-to-r from-red-500 to-orange-500'
                       )}
                       style={{ width: `${timePercentage}%` }}
                     ></div>
@@ -602,7 +600,7 @@ export default function QuizPage() {
                       className={cn(
                         "w-full p-5 text-left rounded-lg font-semibold transition-all duration-200 border-2 transform hover:scale-102 hover:shadow-md",
                         answers[currentQuestion] === index
-                          ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-400 text-white shadow-md ring-2 ring-blue-300"
+                          ? "bg-linear-to-r from-purple-600 to-blue-600 border-purple-400 text-white shadow-md ring-2 ring-blue-300"
                           : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 hover:border-gray-300"
                       )}
                     >
@@ -626,7 +624,7 @@ export default function QuizPage() {
                   </Button>
                   <Button
                     onClick={handleNext}
-                    className="px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-md transition-all duration-300"
+                    className="px-8 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-md transition-all duration-300"
                   >
                     Câu tiếp
                     <ChevronRight className="w-5 h-5 ml-2" />
@@ -665,7 +663,7 @@ export default function QuizPage() {
             <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300">
               ← Quay lại
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold">
+            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold">
               <Send className="w-4 h-4 mr-2" />
               Nộp bài
             </AlertDialogAction>

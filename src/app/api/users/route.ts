@@ -52,12 +52,12 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { classId, score, group, first } = body;
+    const { classId, score, group, passStep, first } = body;
 
     const db = await getDb();
     const users = db.collection("users");
-    let result
-    if(group) {
+    let result;
+    if (group) {
       result = await users.updateOne(
         { classId: classId },
         {
@@ -67,7 +67,17 @@ export async function PUT(request: Request) {
           },
         },
       );
-    } else if(first) {
+    } else if (passStep) {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
+            passStep,
+            updatedAt: new Date(),
+          },
+        },
+      );
+    } else if (first) {
       result = await users.updateOne(
         { classId: classId },
         {
@@ -90,7 +100,6 @@ export async function PUT(request: Request) {
         },
       );
     }
-
 
     if (result.matchedCount === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

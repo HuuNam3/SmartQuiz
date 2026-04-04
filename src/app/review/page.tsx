@@ -127,7 +127,7 @@ export default function ReviewPage() {
         </div>
 
         <div className="mb-6">
-          <div className="relative w-full aspect-[16/7] rounded-2xl border-2 border-yellow-300 bg-white shadow-lg overflow-hidden">
+          <div className="relative w-full aspect-16/7 rounded-2xl border-2 border-yellow-300 bg-white shadow-lg overflow-hidden">
             <Image
               src="/den_voi_truong_sa.png"
               alt="Banner biển đảo Trường Sa"
@@ -168,10 +168,10 @@ export default function ReviewPage() {
                 <AccordionContent>
                   {item.id === 'noi-thuy' ? (
                     <div className="max-w-4xl mx-auto font-sans">
-                      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-5 rounded-2xl shadow-lg mb-5 border-l-8 border-yellow-400">
+                      <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white p-5 rounded-2xl shadow-lg mb-5 border-l-8 border-yellow-400">
                         <h4 className="text-xl font-bold mb-2">⚖️ Luật Biển Việt Nam 2012</h4>
                         <p className="italic">
-                          "Nội thủy là vùng nước tiếp giáp bờ biển, ở phía trong đường cơ sở và là bộ phận lãnh thổ của Việt Nam."
+                          &quot;Nội thủy là vùng nước tiếp giáp bờ biển, ở phía trong đường cơ sở và là bộ phận lãnh thổ của Việt Nam.&quot;
                         </p>
                       </div>
 
@@ -210,7 +210,7 @@ export default function ReviewPage() {
                     </div>
                   ) : item.id === 'lanh-hai' ? (
                     <div className="max-w-4xl mx-auto font-sans space-y-4">
-                      <div className="bg-gradient-to-r from-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-cyan-300">
+                      <div className="bg-linear-to-r from-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-cyan-300">
                         <h4 className="text-xl font-bold mb-2">🧭 Khái niệm lãnh hải</h4>
                         <p className="text-white/95">
                           Theo Luật Biển Việt Nam năm 2012, <strong>Lãnh hải</strong> là vùng biển có chiều rộng <strong>12 hải lý</strong>{' '}
@@ -242,7 +242,7 @@ export default function ReviewPage() {
                       </div>
 
                       <div className="mt-2">
-                        <div className="relative w-full aspect-[16/9] rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
+                        <div className="relative w-full aspect-video rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
                           <Image
                             src="/lanhquyen.png"
                             alt="Minh họa lãnh hải và chủ quyền"
@@ -258,7 +258,7 @@ export default function ReviewPage() {
                     </div>
                   ) : item.id === 'vung-tiep-giap' ? (
                     <div className="max-w-4xl mx-auto font-sans space-y-4">
-                      <div className="bg-gradient-to-r from-cyan-600 to-teal-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-emerald-300">
+                      <div className="bg-linear-to-r from-cyan-600 to-teal-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-emerald-300">
                         <h4 className="text-xl font-bold mb-2">🌐 Khái niệm vùng tiếp giáp lãnh hải</h4>
                         <p className="text-white/95">
                           Vùng tiếp giáp lãnh hải là vùng biển nằm liền kề bên ngoài lãnh hải, chồng lấn với vùng đặc quyền kinh tế và thềm lục địa.
@@ -295,7 +295,7 @@ export default function ReviewPage() {
                       </div>
 
                       <div className="mt-2">
-                        <div className="relative w-full aspect-[16/9] rounded-lg border border-cyan-100 bg-white shadow-sm overflow-hidden">
+                        <div className="relative w-full aspect-video rounded-lg border border-cyan-100 bg-white shadow-sm overflow-hidden">
                           <Image
                             src="/tepgiaplh.png"
                             alt="Minh họa vùng tiếp giáp lãnh hải"
@@ -311,7 +311,7 @@ export default function ReviewPage() {
                     </div>
                   ) : item.id === 'vung-dac-quyen' ? (
                     <div className="max-w-4xl mx-auto font-sans space-y-4">
-                      <div className="bg-gradient-to-r from-sky-700 to-blue-800 text-white p-5 rounded-2xl shadow-lg border-l-8 border-blue-300">
+                      <div className="bg-linear-to-r from-sky-700 to-blue-800 text-white p-5 rounded-2xl shadow-lg border-l-8 border-blue-300">
                         <h4 className="text-xl font-bold mb-2">⚖️ Cơ sở pháp lý</h4>
                         <p className="text-white/95">Theo Luật số 18/2012/QH13 - Luật Biển Việt Nam năm 2012.</p>
                       </div>
@@ -342,7 +342,7 @@ export default function ReviewPage() {
                       </div>
 
                       <div className="mt-2">
-                        <div className="relative w-full aspect-[16/9] rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
+                        <div className="relative w-full aspect-video rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
                           <Image
                             src="/vungdacquyen.png"
                             alt="Minh họa vùng đặc quyền kinh tế và thềm lục địa"
@@ -414,7 +414,7 @@ export default function ReviewPage() {
         <div className="mt-8 flex justify-center">
           <Button
             size="lg"
-            className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
+            className="px-8 py-6 text-lg font-semibold bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
             onClick={() => router.push('/consolidation')}
           >
             Làm bài tập vượt các trạm

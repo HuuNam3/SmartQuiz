@@ -6,9 +6,11 @@ export type UserType = {
   classId: string
   name: string
   class: string
+  stt: number
   admin?: boolean
   group?: string
   score: number
+  passStep: string[]
   startTime?: number
   endTime?: number
   updatedAt: Date

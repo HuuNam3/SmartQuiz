@@ -57,7 +57,7 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg">
+      <nav className="bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">

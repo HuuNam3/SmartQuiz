@@ -96,7 +96,8 @@ export default function Home() {
 
     const data = users
       .filter((user) => !user.admin) // bỏ admin
-      .map((record, index) => {
+      .sort((a, b) => a.stt - b.stt) // sort từ nhỏ đến lớn theo stt
+      .map((record) => {
         const start = record.startTime
           ? new Date(record.startTime)
           : null
@@ -115,8 +116,9 @@ export default function Home() {
           duration = `${minutes} phút ${seconds} giây`
         }
 
+
         return {
-          STT: index + 1,
+          STT: record.stt,
           'Họ và tên': record.name,
           'Lớp': record.class,
           'Điểm': record.score,
