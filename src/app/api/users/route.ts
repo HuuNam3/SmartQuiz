@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { classId, score, group, passStep, first } = body;
+    const { classId, score, group, passStep, endStep, first, second } = body;
 
     const db = await getDb();
     const users = db.collection("users");
@@ -77,7 +77,29 @@ export async function PUT(request: Request) {
           },
         },
       );
-    } else if (first) {
+    } else if (second) {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
+            timeStep: Date.now(),
+            updatedAt: new Date(),
+          },
+        },
+      );
+    }
+    else if (endStep) {
+      result = await users.updateOne(
+        { classId: classId },
+        {
+          $set: {
+            endStep,
+            updatedAt: new Date(),
+          },
+        },
+      );
+    }
+    else if (first) {
       result = await users.updateOne(
         { classId: classId },
         {

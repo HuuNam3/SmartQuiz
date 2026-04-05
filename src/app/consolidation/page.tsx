@@ -15,8 +15,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Send, AlertCircle } from 'lucide-react'
-import { useUser } from '@/context/user-context'
-import { useRouter } from 'next/navigation'
+import { useUser, /*UserType*/ } from '@/context/user-context'
+// import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface StationQuestion {
@@ -80,7 +80,7 @@ const stationsData: StationData[] = [
         type: 'single',
       },
     ],
-    unlockCode: 'NOIDUY2024',
+    unlockCode: '1',
   },
   {
     id: 2,
@@ -123,7 +123,7 @@ const stationsData: StationData[] = [
         type: 'single',
       },
     ],
-    unlockCode: 'LANHAI2024',
+    unlockCode: '2',
   },
   {
     id: 3,
@@ -176,7 +176,7 @@ const stationsData: StationData[] = [
         correctItems: 'Quyền truy đuổi',
       },
     ],
-    unlockCode: 'TIEPGIAP2024',
+    unlockCode: '3',
   },
   {
     id: 4,
@@ -229,7 +229,7 @@ const stationsData: StationData[] = [
         correctItems: 'Nghiên cứu khoa học biển',
       },
     ],
-    unlockCode: 'DAOQUYEN2024',
+    unlockCode: '4',
   },
 ]
 
@@ -240,12 +240,15 @@ const colorClasses = {
   green: 'from-green-600 to-emerald-600',
 }
 
+const STATION_DURATION = 5 * 60 * 1000 // 5 phút (giây)
+
 export default function ConsolidationPage() {
   const [currentStation, setCurrentStation] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, Record<string, string | string[]>>>({})
+  // const [scores, setScores] = useState<number[]>([])
   const [showUnlockDialog, setShowUnlockDialog] = useState(false)
-  const [unlockedStations, setUnlockedStations] = useState<number[]>([0])
+  const [unlockedStations, setUnlockedStations] = useState<number[]>([])
   const [unlockCode, setUnlockCode] = useState('')
   const [draggedItems, setDraggedItems] = useState<Record<string, string[]>>({})
   const [submittedStations, setSubmittedStations] = useState<Record<number, boolean>>({})
@@ -253,26 +256,29 @@ export default function ConsolidationPage() {
   const [showResultModal, setShowResultModal] = useState(false)
   const [stationPassed, setStationPassed] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number>(STATION_DURATION / 1000)
+  const [isTimeUp, setIsTimeUp] = useState<boolean>(false)
+  const [selectedStation, setSelectedStation] = useState<number | null>(null)
   const dragRef = useRef<{ draggedItem: string; sourceIndex: number } | null>(null)
-  const router = useRouter()
-  const { user } = useUser()
+  // const router = useRouter()
+  const { user/*, setUser, fetchUsers*/ } = useUser()
 
   const station = stationsData[currentStation]
-  const question = station.questions[currentQuestion]
+  const question = station?.questions[currentQuestion]
   // const answerKey = `s${currentStation}q${currentQuestion}`
   const currentAnswer = answers[currentStation]?.[question.id] || ''
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/')
-    }
-  }, [user, router])
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push('/')
+  //   }
+  // }, [user, router])
 
   useEffect(() => {
     const savedAnswer =
       answers[currentStation]?.[question.id]
 
-    if (question.type === 'dragdrop') {
+    if (question?.type === 'dragdrop') {
       if (!savedAnswer) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraggedItems({})
@@ -289,7 +295,7 @@ export default function ConsolidationPage() {
         })
       }
     }
-  }, [currentStation, currentQuestion, answers, question.id, question.type])
+  }, [currentStation, currentQuestion, answers, question?.id, question?.type])
 
   useEffect(() => {
     if (!user) return
@@ -323,7 +329,7 @@ export default function ConsolidationPage() {
     }
 
     // Không fail -> dùng passStep
-    const step = Number(user.passStep) || 1
+    const step = Number(user.passStep) || 0
 
     const unlocked: number[] = Array.from(
       { length: step },
@@ -335,9 +341,78 @@ export default function ConsolidationPage() {
       submitted[i] = true
     }
 
+    setCurrentStation(step - 1)
+
     setUnlockedStations(unlocked)
     setSubmittedStations(submitted)
 
+  }, [user])
+
+  useEffect(() => {
+    if (user?.endStep || (!selectedStation && selectedStation !== 0)) return
+    if (user?.timeStep) {
+      const endTime =
+        user.timeStep + STATION_DURATION;
+
+      const remainingSeconds = Math.floor(
+        (endTime - Date.now()) / 1000
+      );
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTimeLeft(
+        remainingSeconds > 0
+          ? remainingSeconds
+          : 0
+      );
+    } else {
+      setTimeLeft(STATION_DURATION / 1000);
+    }
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+
+          // hết giờ → tự động nộp
+          // eslint-disable-next-line react-hooks/immutability
+          handleSubmitStation()
+          setIsTimeUp(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStation])
+
+  useEffect(() => {
+    if (user?.endStep || !user || user.timeStep) return
+    const handleTimeStep = async () => {
+      // try {
+      //   const data: UserType = {
+      //     ...user,
+      //     timeStep: Date.now(),
+      //     updatedAt: new Date(),
+      //   }
+      //   await fetch(`/api/users`, {
+      //     method: "PUT",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       classId: user.classId,
+      //       second: true,
+      //     }),
+      //   });
+      //   setUser(data)
+      //   fetchUsers()
+      // } catch (error) {
+      //   console.error("Failed to save user:", error);
+      // }
+    }
+    handleTimeStep()
   }, [user])
 
   const handleAnswer = (answer: string | string[]) => {
@@ -376,30 +451,36 @@ export default function ConsolidationPage() {
     }))
   }
 
-  const correctAnswersCount = station.questions.filter((q) => {
-    const userAnswer = answers[currentStation]?.[q.id]
-    if (q.type === 'dragdrop') {
-      if (typeof q.correctItems === 'string') {
-        return userAnswer === q.correctItems
-      } else {
-        return (
-          Array.isArray(userAnswer) &&
-          userAnswer.length === q.correctItems?.length &&
-          userAnswer.every((a) => q.correctItems?.includes(a))
-        )
-      }
-    }
-    return userAnswer === q.answers
-  }).length
+  const correctAnswersCount = (StationId: number) => {
+    return (
+      station?.questions.filter((q) => {
+        const userAnswer = answers[StationId]?.[q.id]
+        if (q.type === 'dragdrop') {
+          if (typeof q.correctItems === 'string') {
+            return userAnswer === q.correctItems
+          } else {
+            return (
+              Array.isArray(userAnswer) &&
+              userAnswer.length === q.correctItems?.length &&
+              userAnswer.every((a) => q.correctItems?.includes(a))
+            )
+          }
+        }
+        return userAnswer === q.answers
+      }).length
+    )
+  }
 
-  const isStationUnlocked = unlockedStations.includes(currentStation)
-  const canShowResults = correctAnswersCount >= 4
 
-  const handleUnlockStation = () => {
+  // const isStationUnlocked = unlockedStations.includes(currentStation)
+  // const canShowResults = correctAnswersCount >= 4
+
+  const handleUnlockStation = async () => {
     const station = stationsData[currentStation]
 
     if (unlockCode === station.unlockCode) {
-      const nextStation = currentStation + 1
+      setSelectedStation(currentStation)
+      const nextStation = currentStation
 
       if (
         nextStation < stationsData.length &&
@@ -411,11 +492,34 @@ export default function ConsolidationPage() {
         ])
       }
 
+      // try {
+      //   const passStep = currentStation + 2
+      //   const data: UserType = {
+      //     ...user,
+      //     passStep,
+      //     updatedAt: new Date(),
+      //   }
+      //   await fetch(`/api/users`, {
+      //     method: "PUT",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       classId: user?.classId,
+      //       passStep,
+      //     }),
+      //   });
+      //   setUser(data)
+      //   fetchUsers()
+      // } catch (error) {
+      //   console.error("Failed to save user:", error);
+      // }
+
       setShowUnlockDialog(false)
       setUnlockCode('')
-      toast.success('Đã mở khóa trạm tiếp theo!')
+      toast.success(`Đã mở khóa trạm ${currentStation + 1}!`)
     } else {
-      toast.warning('Mã mở khóa chưa đúng!')
+      toast.warning(`Mã mở khóa trạm ${currentStation + 1} chưa đúng!`)
     }
   }
 
@@ -434,32 +538,69 @@ export default function ConsolidationPage() {
   }
 
   const handleChangeStation = (stationId: number) => {
-    // KHÔNG cho click nếu chưa unlock
-    if (!unlockedStations.includes(stationId)) return
-
     if (failedStations[stationId]) return
-
+    if (unlockedStations.includes(stationId)) {
+      toast.warning('Đã mở khóa trạm này rồi!')
+      return
+    } else if (selectedStation) {
+      toast.warning('Vui lòng làm xong trạm đang chọn!')
+      return
+    }
+    // setSelectedStation(stationId)
     setCurrentStation(stationId)
-    setCurrentQuestion(0)
-    setDraggedItems({})
+    setUnlockCode('')
+    setShowUnlockDialog(true)
   }
 
-  const handleSubmitStation = () => {
-    const passed = correctAnswersCount >= 4
-
+  const handleSubmitStation = async () => {
+    const passed = correctAnswersCount(currentStation) >= 4
     setStationPassed(passed)
     setShowResultModal(true)
     if (!passed) {
+      // setIsTimeUp(true)
       setFailedStations((prev) => ({
         ...prev,
         [currentStation]: true,
       }))
+
+      // try {
+      //   const endStep = currentStation + 1
+      //   const data: UserType = {
+      //     ...user,
+      //     endStep,
+      //     updatedAt: new Date(),
+      //   }
+      //   await fetch(`/api/users`, {
+      //     method: "PUT",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       classId: user?.classId,
+      //       endStep,
+      //     }),
+      //   });
+      //   setUser(data)
+      //   fetchUsers()
+      // } catch (error) {
+      //   console.error("Failed to save user:", error);
+      // }
     }
     setSubmittedStations((prev) => ({
       ...prev,
       [currentStation]: true,
     }))
+
+    setSelectedStation(null)
+    setTimeLeft(STATION_DURATION / 1000)
   }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
@@ -485,7 +626,7 @@ export default function ConsolidationPage() {
               <button
                 key={idx}
                 onClick={() => handleChangeStation(idx)}
-                disabled={!isUnlocked || isFailed}
+                // disabled={!isUnlocked || isFailed || isPassed}
                 className={cn(
                   'p-4 rounded-lg font-bold text-center transition-all duration-300 transform',
                   isFailed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105',
@@ -513,22 +654,33 @@ export default function ConsolidationPage() {
                   Trạm {idx + 1}
                 </div>
                 <div className="text-xs">{st.title}</div>
+
+                {/* Hiển thị điểm */}
+                {(isFailed || isPassed) && (
+                  <div
+                    className={cn(
+                      "mt-1 text-sm font-bold px-2 py-1 rounded-md",
+                      isFailed &&
+                      "bg-red-200 text-red-800 border border-red-400",
+                      isPassed &&
+                      "bg-green-200 text-green-800 border border-green-400"
+                    )}
+                  >
+                    {isFailed
+                      ? `Chưa đạt: ${correctAnswersCount(idx)}/5 câu`
+                      : `Đã đạt: ${correctAnswersCount(idx)}/5 câu`}
+                  </div>
+                )}
               </button>
             )
           })}
         </div>
 
         {/* Main Station Content */}
-        {!isStationUnlocked && canShowResults ? (
+        {!selectedStation && selectedStation !== 0 ? (
           <Card className="p-8 text-center shadow-lg bg-white border-blue-200 border">
             <Lock className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">Trạm được khóa!</h2>
-            <p className="text-gray-600 mb-6">
-              Bạn đã trả lời đúng {correctAnswersCount} câu. Hãy nhập mã để mở khóa trạm tiếp theo!
-            </p>
-            <Button onClick={() => setShowUnlockDialog(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
-              Nhập Mã
-            </Button>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Hãy chọn một trạm và nhập mã để mở khóa trạm!</h2>
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -568,7 +720,7 @@ export default function ConsolidationPage() {
                     <span>Chưa trả lời ({station.questions.length - Object.keys(answers[currentStation] || {}).length})</span>
                   </div>
                 </div>
-                {currentStation === 3 ?
+                {/* {currentStation === 3 ?
                   <Button
                     onClick={() => { router.push('/') }}
                     className="w-full mt-5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold"
@@ -584,7 +736,7 @@ export default function ConsolidationPage() {
                       ? 'Nộp bài trước'
                       : 'Mở khóa trạm'}
                   </Button>
-                }
+                } */}
               </Card>
             </div>
 
@@ -596,15 +748,19 @@ export default function ConsolidationPage() {
                     <span className="text-sm font-bold text-white bg-blue-600 px-3 py-1 rounded-full">
                       Câu {currentQuestion + 1}/{station.questions.length}
                     </span>
-                    <div className="w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+
+                    {!isTimeUp &&
                       <div
                         className={cn(
-                          'h-full bg-linear-to-r rounded-full transition-all duration-500',
-                          `${colorClasses[station.color as keyof typeof colorClasses]}`
+                          "text-sm font-bold px-3 py-1 rounded-full",
+                          timeLeft <= 30
+                            ? "bg-red-600 text-white animate-pulse"
+                            : "bg-orange-500 text-white"
                         )}
-                        style={{ width: `${((currentQuestion + 1) / station.questions.length) * 100}%` }}
-                      ></div>
-                    </div>
+                      >
+                        ⏱️ {formatTime(timeLeft)}
+                      </div>
+                    }
                   </div>
                 </div>
 
@@ -647,6 +803,18 @@ export default function ConsolidationPage() {
                             onDragStart={() =>
                               handleDragStart(item, idx)
                             }
+                            onClick={() => {
+                              if (submittedStations[currentStation]) return
+
+                              setDraggedItems((prev) => ({
+                                ...prev,
+                                dropzone: [
+                                  ...(prev["dropzone"] || []),
+                                  item,
+                                ],
+                              }))
+                            }}
+
                             className="bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg p-4 font-semibold text-gray-700 cursor-grab hover:cursor-grabbing hover:border-blue-400 transition-all duration-200 transform hover:shadow-md"
                           >
                             {item}
@@ -711,7 +879,7 @@ export default function ConsolidationPage() {
                     className="w-full bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-5 h-5 mr-2" />
-                    {submittedStations[currentStation] ? 'Đã nộp bài' : 'Nộp Trạm'}
+                    Nộp Trạm
                   </Button>
                 </div>
               </Card>
@@ -743,8 +911,8 @@ export default function ConsolidationPage() {
 
               <AlertDialogDescription className="text-lg text-gray-700 mb-4">
                 {stationPassed
-                  ? `Bạn đã trả lời đúng ${correctAnswersCount} câu! Bạn qua được trạm này! Gặp thầy giáo để có được mã qua trạm.`
-                  : `Bạn chỉ trả lời đúng ${correctAnswersCount}/5 câu. Cần ${5 - correctAnswersCount} câu nữa để qua trạm. Bạn không thể làm các trạm khác.`}
+                  ? `Bạn đã trả lời đúng ${correctAnswersCount(currentStation)} câu! Bạn qua được trạm này! Gặp thầy giáo để có được mã qua trạm.`
+                  : `Bạn chỉ trả lời đúng ${correctAnswersCount(currentStation)}/5 câu. Cần ${5 - correctAnswersCount(currentStation)} câu nữa để có điểm trạm .`}
               </AlertDialogDescription>
             </div>
 
@@ -765,7 +933,7 @@ export default function ConsolidationPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl text-gray-800 flex items-center gap-2">
                 <Unlock className="w-6 h-6 text-blue-600" />
-                Nhập Mã Mở Khóa
+                Nhập Mã Mở Khóa trạm {currentStation + 1}
               </AlertDialogTitle>
             </AlertDialogHeader>
             <div className="py-4">
@@ -798,10 +966,10 @@ export default function ConsolidationPage() {
               </AlertDialogTitle>
 
               <AlertDialogDescription>
-                Bạn đã trả lời đúng:
+                Bạn đã trả lời:
 
                 <span className="font-bold text-green-600 ml-1">
-                  {correctAnswersCount}/5 câu
+                  {Object.keys(answers[currentStation] || {}).length}/5 câu
                 </span>
 
                 <br />

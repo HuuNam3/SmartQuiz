@@ -86,15 +86,15 @@ export default function ReviewPage() {
   const router = useRouter()
   const { user } = useUser()
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/')
-    }
-  }, [user, router])
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push('/')
+  //   }
+  // }, [user, router])
 
-  if (!user) {
-    return null
-  }
+  // if (!user) {
+  //   return null
+  // }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
@@ -111,14 +111,14 @@ export default function ReviewPage() {
               <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="font-semibold text-red-700">{user.name}</span>
+              <span className="font-semibold text-red-700">{user?.name}</span>
             </span>
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
             <span className="flex items-center gap-2 text-gray-700">
               <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <span className="font-semibold text-amber-700">{user.class}</span>
+              <span className="font-semibold text-amber-700">{user?.class}</span>
             </span>
           </div>
           <p className="text-sm text-gray-500 mt-4">
@@ -186,20 +186,21 @@ export default function ReviewPage() {
                       <div className="bg-green-50 p-4 rounded-xl shadow mb-4">
                         <h4 className="font-semibold text-lg mb-2">✅ Quyền của người dân</h4>
                         <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                          <li>Sử dụng tài nguyên để sinh hoạt và sản xuất</li>
-                          <li>Phát triển kinh tế</li>
-                          <li>Tham gia quản lý và sử dụng tài nguyên</li>
+                          <li>Người dân có quyền sử dụng tài nguyên trong vùng nội thủy để sinh hoạt, sản xuất và phát triển kinh tế</li>
+                          <li>Người dân có nghĩa vụ bảo vệ tài nguyên và môi trường trong vùng nội thủy, đồng thời phải tuân thủ các quy định về bảo vệ môi trường và tài nguyên biển</li>
+                          <li>Người dân cần phải đăng ký và được cấp phép sử dụng tài nguyên trong vùng nội thủy theo quy định của pháp luật</li>
+                          <li>Người dân trong vùng nội thủy có quyền tham gia vào quá trình quản lý và sử dụng tài nguyên trong vùng. Chính phủ và các cơ quan chức năng sẽ tạo điều kiện để người dân tham gia vào các hoạt động như xây dựng kế hoạch quản lý tài nguyên, giám sát hoạt động khai thác và bảo vệ tài nguyên biển</li>
                         </ul>
                       </div>
 
-                      <div className="bg-red-50 p-4 rounded-xl shadow mb-4">
+                      {/* <div className="bg-red-50 p-4 rounded-xl shadow mb-4">
                         <h4 className="font-semibold text-lg mb-2">🛡️ Nghĩa vụ</h4>
                         <ul className="list-disc ml-5 text-gray-700 space-y-1">
                           <li>Bảo vệ tài nguyên và môi trường</li>
                           <li>Tuân thủ quy định pháp luật</li>
                           <li>Đăng ký và xin phép khi khai thác tài nguyên</li>
                         </ul>
-                      </div>
+                      </div> */}
 
                       <div className="bg-yellow-50 p-4 rounded-xl shadow mt-6">
                         <h4 className="font-semibold text-lg mb-2">💬 Thông điệp</h4>
@@ -221,16 +222,15 @@ export default function ReviewPage() {
                       <div className="bg-sky-50 p-4 rounded-xl shadow">
                         <h4 className="font-semibold text-lg mb-2">⚖️ Chế độ pháp lý (Điều 12 khoản 1)</h4>
                         <p className="text-gray-700">
-                          Nhà nước thực hiện <strong>chủ quyền đầy đủ và toàn vẹn</strong> đối với lãnh hải, vùng trời trên lãnh hải, đáy biển và lòng
-                          đất dưới đáy biển của lãnh hải phù hợp với Công ước của Liên hợp quốc về Luật Biển năm 1982.
+                          Chế độ pháp lý của lãnh hải Nhà nước thực hiện chủ quyền đầy đủ và toàn vẹn đối với lãnh hải, vùng trời trên lãnh hải,
+                          đáy biển và lòng đất dưới đáy biển của lãnh hải phù hợp với Công ước của Liên hợp quốc về Luật Biển năm 1982.
                         </p>
                       </div>
 
                       <div className="bg-emerald-50 p-4 rounded-xl shadow">
                         <h4 className="font-semibold text-lg mb-2">🚢 Quyền đi qua không gây hại</h4>
                         <p className="text-gray-700 mb-3">
-                          Theo Công ước Liên hợp quốc về Luật Biển năm 1982 (Điều 17): Với điều kiện phải tuân theo Công ước này, tàu thuyền của tất cả
-                          các quốc gia, có biển hay không có biển, đều được hưởng <strong>quyền đi qua không gây hại</strong> trong lãnh hải.
+                          Theo Công ước Liên hợp quốc về Luật Biển năm 1982 Điều 17. Quyền đi qua không gây hại Với điều kiện phải tuân theo Công ước này, tàu thuyền của tất cả các quốc gia, có biển hay không có biển, đều được hưởng quyền đi qua không gây hại trong lãnh hải.
                         </p>
                         <div className="bg-white/70 border border-emerald-200 rounded-lg p-3">
                           <p className="text-gray-700">
@@ -319,16 +319,14 @@ export default function ReviewPage() {
                       <div className="bg-blue-50 p-4 rounded-xl shadow">
                         <h4 className="font-semibold text-lg mb-2">🌊 Điều 15 - Vùng đặc quyền kinh tế</h4>
                         <p className="text-gray-700">
-                          Vùng đặc quyền kinh tế là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, hợp với lãnh hải thành một vùng biển có chiều rộng
-                          200 hải lý tính từ đường cơ sở.
+                          Vùng đặc quyền kinh tế là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, hợp với lãnh hải thành một vùng biển có chiều rộng 200 hải lý tính từ đường cơ sở.
                         </p>
                       </div>
 
                       <div className="bg-indigo-50 p-4 rounded-xl shadow">
                         <h4 className="font-semibold text-lg mb-2">🧭 Điều 17 - Thềm lục địa</h4>
                         <p className="text-gray-700">
-                          Thềm lục địa là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự
-                          nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến mép ngoài của rìa lục địa.
+                          Thềm lục địa là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến mép ngoài của rìa lục địa.
                         </p>
                       </div>
 
