@@ -38,6 +38,12 @@ interface StationData {
   unlockCode?: string
 }
 
+type Code = {
+  StationCode: number
+  code: string
+  used: boolean
+}
+
 const stationsData: StationData[] = [
   {
     id: 1,
@@ -246,7 +252,7 @@ export default function ConsolidationPage() {
   const [currentStation, setCurrentStation] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, Record<string, string | string[]>>>({})
-  // const [scores, setScores] = useState<number[]>([])
+  const [scores, setScores] = useState<number[]>([0, 0, 0, 0])
   const [showUnlockDialog, setShowUnlockDialog] = useState(false)
   const [unlockedStations, setUnlockedStations] = useState<number[]>([])
   const [unlockCode, setUnlockCode] = useState('')
@@ -476,9 +482,27 @@ export default function ConsolidationPage() {
   // const canShowResults = correctAnswersCount >= 4
 
   const handleUnlockStation = async () => {
-    const station = stationsData[currentStation]
+    try {
+      const res = await fetch('/api/codes')
+      const data = await res.json()
 
-    if (unlockCode === station.unlockCode) {
+      // tìm mã trong database
+      const foundCode = data.find(
+        (c: Code) =>
+          c.code === unlockCode
+        // && c.stationCode === currentStation + 1
+      )
+
+      if (!foundCode) {
+        toast.warning(`Mã mở khóa trạm ${currentStation + 1} chưa đúng!`)
+        return
+      }
+
+      if (foundCode.used) {
+        toast.error('Mã đã được sử dụng')
+        return
+      }
+
       setSelectedStation(currentStation)
       const nextStation = currentStation
 
@@ -518,8 +542,19 @@ export default function ConsolidationPage() {
       setShowUnlockDialog(false)
       setUnlockCode('')
       toast.success(`Đã mở khóa trạm ${currentStation + 1}!`)
-    } else {
-      toast.warning(`Mã mở khóa trạm ${currentStation + 1} chưa đúng!`)
+      // put code used
+      // await fetch('/api/codes', {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify({
+      //     code: unlockCode
+      //   })
+      // })
+
+    } catch (err) {
+      console.log('Failed to fetch codes: ' + err)
     }
   }
 
@@ -546,7 +581,7 @@ export default function ConsolidationPage() {
       toast.warning('Vui lòng làm xong trạm đang chọn!')
       return
     }
-    // setSelectedStation(stationId)
+    setCurrentQuestion(0)
     setCurrentStation(stationId)
     setUnlockCode('')
     setShowUnlockDialog(true)
@@ -554,6 +589,11 @@ export default function ConsolidationPage() {
 
   const handleSubmitStation = async () => {
     const passed = correctAnswersCount(currentStation) >= 4
+    setScores(prev => {
+      const newScores = [...prev]
+      newScores[currentStation] = correctAnswersCount(currentStation)
+      return newScores
+    })
     setStationPassed(passed)
     setShowResultModal(true)
     if (!passed) {
@@ -660,15 +700,15 @@ export default function ConsolidationPage() {
                   <div
                     className={cn(
                       "mt-1 text-sm font-bold px-2 py-1 rounded-md",
-                      isFailed &&
-                      "bg-red-200 text-red-800 border border-red-400",
-                      isPassed &&
-                      "bg-green-200 text-green-800 border border-green-400"
+                      isFailed ?
+                        "bg-red-200 text-red-800 border border-red-400"
+                        :
+                        "bg-green-200 text-green-800 border border-green-400"
                     )}
                   >
                     {isFailed
-                      ? `Chưa đạt: ${correctAnswersCount(idx)}/5 câu`
-                      : `Đã đạt: ${correctAnswersCount(idx)}/5 câu`}
+                      ? `Chưa đạt: ${scores[idx]}/5 câu`
+                      : `Đã đạt: ${scores[idx]}/5 câu`}
                   </div>
                 )}
               </button>
@@ -911,8 +951,8 @@ export default function ConsolidationPage() {
 
               <AlertDialogDescription className="text-lg text-gray-700 mb-4">
                 {stationPassed
-                  ? `Bạn đã trả lời đúng ${correctAnswersCount(currentStation)} câu! Bạn qua được trạm này! Gặp thầy giáo để có được mã qua trạm.`
-                  : `Bạn chỉ trả lời đúng ${correctAnswersCount(currentStation)}/5 câu. Cần ${5 - correctAnswersCount(currentStation)} câu nữa để có điểm trạm .`}
+                  ? `Bạn đã trả lời đúng ${correctAnswersCount(currentStation)} câu! Bạn được điểm trạm này!`
+                  : `Bạn chỉ trả lời đúng ${correctAnswersCount(currentStation)}/5 câu. Cần ${4 - correctAnswersCount(currentStation)} câu nữa để có điểm trạm này! .`}
               </AlertDialogDescription>
             </div>
 

@@ -162,33 +162,46 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!group) {
       toast.warning('vui lòng chọn nhóm!')
       return
     }
+
+    // chuẩn hóa input
+    const normalizedClassId = classId.trim().toLowerCase()
+
     const findUserGroup = users.find(
-      (u) => u.classId === classId && u.group
+      (u) =>
+        u.classId?.trim().toLowerCase() === normalizedClassId &&
+        u.group
     )
+
     clearUser()
-    const findUser = users.find((u) => u.classId === classId)
+
+    const findUser = users.find(
+      (u) =>
+        u.classId?.trim().toLowerCase() === normalizedClassId
+    )
 
     if (!findUserGroup) {
       if (!findUser) {
         toast.error('mã học sinh chưa đúng!')
         return
       }
-      // Show verification dialog for new login
+
       const userToVerify = {
         ...findUser,
         group
       }
+
       setPendingUser(userToVerify)
       setEditClassId(userToVerify.classId)
       setEditGroup(userToVerify.group)
       setVerifyMode('login')
       setShowVerifyDialog(true)
+
     } else {
-      // Show verification dialog for existing user
       setPendingUser(findUserGroup)
       setEditClassId(findUserGroup.classId)
       setEditGroup(findUserGroup.group || '')
@@ -347,7 +360,7 @@ export default function Home() {
                 placeholder="Nhập mã truy cập..."
                 value={accessCode}
                 onChange={(e) => {
-                  setAccessCode(e.target.value)
+                  setAccessCode(e.target.value.toUpperCase())
                   setAccessError('')
                 }}
                 className="

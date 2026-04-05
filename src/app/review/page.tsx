@@ -86,15 +86,15 @@ export default function ReviewPage() {
   const router = useRouter()
   const { user } = useUser()
 
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.push('/')
-  //   }
-  // }, [user, router])
+  useEffect(() => {
+    if (!user) {
+      router.push('/')
+    }
+  }, [user, router])
 
-  // if (!user) {
-  //   return null
-  // }
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
