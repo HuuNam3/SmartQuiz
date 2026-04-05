@@ -324,7 +324,7 @@ export default function ReviewPage() {
                       </div>
 
                       <div className="bg-indigo-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">🧭 Điều 17 - Thềm lục địa</h4>
+                        <h4 className="font-semibold text-lg mb-2">🧭 Điều 17 - Thềm lục địa.</h4>
                         <p className="text-gray-700">
                           Thềm lục địa là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến mép ngoài của rìa lục địa.
                         </p>
