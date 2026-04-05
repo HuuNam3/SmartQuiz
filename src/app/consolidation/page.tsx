@@ -577,7 +577,7 @@ export default function ConsolidationPage() {
     if (unlockedStations.includes(stationId)) {
       toast.warning('Đã mở khóa trạm này rồi!')
       return
-    } else if (selectedStation) {
+    } else if (selectedStation || selectedStation === 0) {
       toast.warning('Vui lòng làm xong trạm đang chọn!')
       return
     }
