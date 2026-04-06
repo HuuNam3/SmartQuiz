@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { useUser, UserType } from '@/context/user-context'
+import MusicPlayer from '@/components/MusicPlayer'
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -463,7 +464,7 @@ export default function Home() {
                     <Input
                       type="text"
                       value={editClassId}
-                      onChange={(e) => {}}
+                      onChange={() => { }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -636,6 +637,7 @@ export default function Home() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
                   {user.admin ? 'Quản trị viên' : 'Xin chào!'}
+                  <MusicPlayer name="Nen" loop />
                 </h2>
               </div>
 

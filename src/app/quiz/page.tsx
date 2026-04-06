@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { CheckCircle2, Clock, BookOpen, ChevronLeft, ChevronRight, Send, Trophy, Zap, Brain, Star, Flame, Target } from 'lucide-react'
+import MusicPlayer from '@/components/MusicPlayer'
 
 // Ngân hàng 10 câu hỏi
 const allQuestions = [
@@ -341,6 +342,7 @@ export default function QuizPage() {
             style={{ zIndex: 10 }}
           />
         )}
+        <MusicPlayer name="Ontap" loop />
         <div className="max-w-2xl mx-auto w-full relative z-20">
           <Card className="p-8 text-center shadow-lg border-0 relative overflow-hidden bg-white">
             <div className="absolute top-0 right-0 w-40 h-40 bg-linear-to-bl from-purple-100 to-transparent rounded-full blur-3xl opacity-50"></div>
@@ -381,7 +383,7 @@ export default function QuizPage() {
                   "text-6xl font-black mb-3 text-balance",
                   user.score >= 5 ? "bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
                     user.score >= 3 ? "bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent" :
-                    "bg-linear-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
+                      "bg-linear-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
                 )}>
                   {user.score}/{MAX_SCORE}
                 </div>

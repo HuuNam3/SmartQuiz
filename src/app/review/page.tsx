@@ -7,6 +7,7 @@ import { useUser } from '@/context/user-context'
 import { Card } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
+import MusicPlayer from '@/components/MusicPlayer'
 
 const reviewContent = [
   {
@@ -98,6 +99,7 @@ export default function ReviewPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
+      <MusicPlayer name="Nen" loop={true}/> 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-red-600 to-rose-600 shadow-lg mb-4 ring-4 ring-yellow-300/70">

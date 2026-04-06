@@ -18,6 +18,7 @@ import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2
 import { useUser, UserType } from '@/context/user-context'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import MusicPlayer from '@/components/MusicPlayer'
 
 interface StationQuestion {
   id: string
@@ -39,7 +40,7 @@ interface StationData {
 }
 
 type Code = {
-  StationCode: number
+  stationCode: number
   code: string
   used: boolean
 }
@@ -311,7 +312,7 @@ export default function ConsolidationPage() {
 
     const passScore = 4 // chỉnh theo rule của bạn
 
-    const scoreSteps: number[] = user?.scoreStep || [-1,-1,-1,-1]
+    const scoreSteps: number[] = user?.scoreStep || [-1, -1, -1, -1]
 
     // Duyệt từng trạm dựa vào scoreStep
     scoreSteps.forEach((score, index) => {
@@ -442,18 +443,21 @@ export default function ConsolidationPage() {
   // const canShowResults = correctAnswersCount >= 4
 
   const handleUnlockStation = async () => {
-    if(!user) return
+    if (!user) return
     try {
       const res = await fetch('/api/codes')
       const data = await res.json()
 
       // tìm mã trong database
       const foundCode = data.find(
-        (c: Code) =>
-          c.code === unlockCode
-          && c?.StationCode === currentStation + 1
+        (c: Code) => {
+          console.log(c.code)
+          console.log(unlockCode)
+          console.log(c.stationCode)
+          console.log(c.code)
+          return c.code === unlockCode && c.stationCode === currentStation + 1
+        }
       )
-
       if (!foundCode) {
         toast.warning(`Mã mở khóa trạm ${currentStation + 1} chưa đúng!`)
         return
@@ -539,8 +543,8 @@ export default function ConsolidationPage() {
       toast.warning('Vui lòng làm xong trạm đang chọn!')
       return
     }
-    setCurrentQuestion(0)
     setCurrentStation(stationId)
+    setCurrentQuestion(0)
     setUnlockCode('')
     setShowUnlockDialog(true)
   }
@@ -678,6 +682,7 @@ export default function ConsolidationPage() {
         {!selectedStation && selectedStation !== 0 ? (
           <Card className="p-8 text-center shadow-lg bg-white border-blue-200 border">
             <Lock className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+            <MusicPlayer name="Nen" loop />
             <h2 className="text-2xl font-bold text-gray-800 mb-3">Hãy chọn một trạm và nhập mã để mở khóa trạm!</h2>
           </Card>
         ) : (
@@ -766,6 +771,7 @@ export default function ConsolidationPage() {
 
                 {question.type === 'dragdrop' ? (
                   <div className="mb-8 space-y-6">
+                    <MusicPlayer name={`Tram-${currentStation + 1}`} loop />
                     <div
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, 'dropzone')}
@@ -833,6 +839,7 @@ export default function ConsolidationPage() {
                   </div>
                 ) : (
                   <div className="space-y-4 mb-10">
+                    <MusicPlayer name={`Tram-${currentStation + 1}`} loop />
                     {question.options.map((option, idx) => (
                       <button
                         key={idx}
@@ -905,6 +912,8 @@ export default function ConsolidationPage() {
 
               <AlertDialogTitle className={cn('text-3xl font-bold mb-2 text-balance', stationPassed ? 'text-green-600' : 'text-red-600')}>
                 {stationPassed ? 'Chúc Mừng! 🎉' : 'Tiếc quá! 😢'}
+                {stationPassed ? <MusicPlayer name="success" loop={false} /> : <MusicPlayer name="Fail" loop={false} />}
+
               </AlertDialogTitle>
 
               <AlertDialogDescription className="text-lg text-gray-700 mb-4">
