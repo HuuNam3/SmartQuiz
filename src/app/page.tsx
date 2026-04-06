@@ -88,6 +88,11 @@ export default function Home() {
     }
   }
 
+  const getScore = (score?: number) => {
+    if (score === undefined || score === -1) return ''
+    return score
+  }
+
   const exportToExcel = () => {
     if (users.length === 0) {
       alert('Chưa có học sinh nào làm bài!')
@@ -121,7 +126,12 @@ export default function Home() {
           STT: record.stt,
           'Họ và tên': record.name,
           'Lớp': record.class,
-          'Điểm': record.score,
+          'Nhóm': record.group,
+          'Điểm trạm 1': getScore(record?.scoreStep?.[0]),
+          'Điểm trạm 2': getScore(record?.scoreStep?.[1]),
+          'Điểm trạm 3': getScore(record?.scoreStep?.[2]),
+          'Điểm trạm 4': getScore(record?.scoreStep?.[3]),
+          'Điểm ôn tập': record.score,
 
           'Ngày làm bài': start
             ? start.toLocaleDateString('vi-VN')
@@ -453,7 +463,7 @@ export default function Home() {
                     <Input
                       type="text"
                       value={editClassId}
-                      onChange={(e) => setEditClassId(e.target.value)}
+                      onChange={(e) => {}}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>

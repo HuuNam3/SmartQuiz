@@ -94,7 +94,7 @@ const allQuestions = [
 
 const QUIZ_COUNT = 6
 const MAX_SCORE = 6
-const QUIZ_DURATION = 6 * 60 * 1000 + 10000// 6 phút tính bằng giây
+const QUIZ_DURATION = 6 * 60 * 1000// 6 phút tính bằng giây
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {

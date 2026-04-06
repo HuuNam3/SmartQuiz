@@ -10,9 +10,9 @@ export type UserType = {
   admin?: boolean
   group?: string
   score: number
-  timeStep?: number
-  passStep?: number
-  endStep?: number
+  timeStep?: Number
+  continueStep?: number
+  scoreStep?: number[]
   startTime?: number
   endTime?: number
   updatedAt: Date

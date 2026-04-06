@@ -167,6 +167,115 @@ export default function ProfilePage() {
           )}
         </Card>
 
+        {/* Station Score Card */}
+        <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 17v-2m0-4V7m6 10v-6m0-4V7M5 21h14"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-bold text-gray-800">
+              Điểm từng trạm
+            </h2>
+          </div>
+
+          {user?.scoreStep?.map((score: number, index: number) => {
+            const maxScorePerStation = 5
+            const passScore = 4
+
+            let bg = ""
+            let status = ""
+            let label = ""
+
+            if (score === -1) {
+              bg = "bg-gray-100 border-gray-200 text-gray-600"
+              status = "Chưa làm"
+            } else {
+              const ratio = score / maxScorePerStation
+
+              // FAIL (0-3 điểm) -> đỏ
+              if (score < passScore) {
+                if (ratio <= 0.2) {
+                  bg = "bg-red-700 border-red-800 text-white"
+                } else if (ratio <= 0.4) {
+                  bg = "bg-red-600 border-red-700 text-white"
+                } else if (ratio <= 0.6) {
+                  bg = "bg-red-500 border-red-600 text-white"
+                } else {
+                  bg = "bg-red-400 border-red-500 text-white"
+                }
+
+                status = "Không đạt"
+              }
+
+              // PASS (4-5 điểm) -> xanh
+              else {
+                if (ratio < 1) {
+                  bg = "bg-emerald-400 border-emerald-500 text-emerald-900"
+                } else {
+                  bg = "bg-emerald-600 border-emerald-700 text-white"
+                }
+
+                status = "Đạt"
+              }
+
+              label = `${score} / ${maxScorePerStation}`
+            }
+
+            return (
+              <div
+                key={index}
+                className={`p-5 rounded-2xl border ${bg}
+                  shadow-md hover:shadow-lg transition-all duration-200`}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 011.553-1.894L9 1m0 19l6-2m-6 2V1m6 17l5.447-2.724A2 2 0 0021 15.382V5.618a2 2 0 00-1.553-1.894L15 1m0 17V1"
+                      />
+                    </svg>
+                  </div>
+
+                  <p className="font-semibold">
+                    Trạm {index + 1}
+                  </p>
+                </div>
+
+                {score !== -1 && (
+                  <p className="text-2xl font-bold mb-1">
+                    {label}
+                  </p>
+                )}
+
+                <p className="text-sm opacity-90">
+                  {status}
+                </p>
+              </div>
+            )
+          })}
+        </Card>
+
         {/* Logout Button */}
         <div className="text-center">
           <Button

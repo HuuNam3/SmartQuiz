@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { classId, score, group, passStep, endStep, first, second } = body;
+    const { classId, score, group, scoreStep, continueStep, first, second } = body;
 
     const db = await getDb();
     const users = db.collection("users");
@@ -67,12 +67,13 @@ export async function PUT(request: Request) {
           },
         },
       );
-    } else if (passStep) {
+    } else if (scoreStep) {
       result = await users.updateOne(
         { classId: classId },
         {
           $set: {
-            passStep,
+            scoreStep,
+            continueStep,
             updatedAt: new Date(),
           },
         },
@@ -83,17 +84,7 @@ export async function PUT(request: Request) {
         {
           $set: {
             timeStep: Date.now(),
-            updatedAt: new Date(),
-          },
-        },
-      );
-    }
-    else if (endStep) {
-      result = await users.updateOne(
-        { classId: classId },
-        {
-          $set: {
-            endStep,
+            continueStep,
             updatedAt: new Date(),
           },
         },

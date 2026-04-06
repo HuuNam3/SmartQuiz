@@ -15,8 +15,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Send, AlertCircle } from 'lucide-react'
-import { useUser, /*UserType*/ } from '@/context/user-context'
-// import { useRouter } from 'next/navigation'
+import { useUser, UserType } from '@/context/user-context'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface StationQuestion {
@@ -252,7 +252,7 @@ export default function ConsolidationPage() {
   const [currentStation, setCurrentStation] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, Record<string, string | string[]>>>({})
-  const [scores, setScores] = useState<number[]>([0, 0, 0, 0])
+  const [scores, setScores] = useState<number[]>([-1, -1, -1, -1])
   const [showUnlockDialog, setShowUnlockDialog] = useState(false)
   const [unlockedStations, setUnlockedStations] = useState<number[]>([])
   const [unlockCode, setUnlockCode] = useState('')
@@ -266,19 +266,19 @@ export default function ConsolidationPage() {
   const [isTimeUp, setIsTimeUp] = useState<boolean>(false)
   const [selectedStation, setSelectedStation] = useState<number | null>(null)
   const dragRef = useRef<{ draggedItem: string; sourceIndex: number } | null>(null)
-  // const router = useRouter()
-  const { user/*, setUser, fetchUsers*/ } = useUser()
+  const router = useRouter()
+  const { user, setUser, fetchUsers } = useUser()
 
   const station = stationsData[currentStation]
   const question = station?.questions[currentQuestion]
   // const answerKey = `s${currentStation}q${currentQuestion}`
   const currentAnswer = answers[currentStation]?.[question.id] || ''
 
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.push('/')
-  //   }
-  // }, [user, router])
+  useEffect(() => {
+    if (!user) {
+      router.push('/')
+    }
+  }, [user, router])
 
   useEffect(() => {
     const savedAnswer =
@@ -286,7 +286,6 @@ export default function ConsolidationPage() {
 
     if (question?.type === 'dragdrop') {
       if (!savedAnswer) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraggedItems({})
         return
       }
@@ -308,78 +307,68 @@ export default function ConsolidationPage() {
 
     const failed: Record<number, boolean> = {}
     const submitted: Record<number, boolean> = {}
+    const unlocked: number[] = []
 
-    // Nếu có endStep -> fail tại trạm đó
-    if (user.endStep) {
-      const step = Number(user.endStep) || 1
+    const passScore = 4 // chỉnh theo rule của bạn
 
-      const unlocked: number[] = Array.from(
-        { length: step },
-        (_, i) => i
-      )
+    const scoreSteps: number[] = user?.scoreStep || [-1,-1,-1,-1]
 
-      // các trạm trước đó đã submit
-      unlocked.forEach((i) => {
-        submitted[i] = true
-      })
+    // Duyệt từng trạm dựa vào scoreStep
+    scoreSteps.forEach((score, index) => {
+      // nếu đã làm (không phải -1)
+      if (score !== -1) {
+        submitted[index] = true
+        unlocked.push(index)
 
-      // chỉ khóa đúng trạm fail
-      failed[step - 1] = true
+        if (score < passScore) {
+          failed[index] = true
+        }
+      }
+    })
+    setScores(scoreSteps)
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUnlockedStations(unlocked)
-      setFailedStations(failed)
-      setSubmittedStations(submitted)
+    // Nếu có continueStep -> làm tiếp trạm đó
+    if (user.continueStep !== undefined && user.continueStep !== null && user.continueStep !== -1) {
+      const step = Number(user.continueStep)
 
-      return
+      setCurrentStation(step)
+
+      // đảm bảo trạm đó được unlock
+      if (!unlocked.includes(step)) {
+        unlocked.push(step)
+      }
+
+      setSelectedStation(step)
+
+      // tính thời gian còn lại
+
+      if (user?.timeStep) {
+        const startTime = new Date(Number(user.timeStep))
+        const now = Date.now()
+
+        const remaining = Number(STATION_DURATION - (now - Number(startTime)))
+        if (remaining > 0) {
+          setTimeLeft(Math.floor(remaining / 1000))
+        } else {
+          setTimeLeft(0)
+        }
+      }
     }
-
-    // Không fail -> dùng passStep
-    const step = Number(user.passStep) || 0
-
-    const unlocked: number[] = Array.from(
-      { length: step },
-      (_, i) => i
-    )
-
-    // các trạm đã unlock coi như đã submit
-    for (let i = 0; i < step - 1; i++) {
-      submitted[i] = true
-    }
-
-    setCurrentStation(step - 1)
 
     setUnlockedStations(unlocked)
+    setFailedStations(failed)
     setSubmittedStations(submitted)
 
   }, [user])
 
   useEffect(() => {
-    if (user?.endStep || (!selectedStation && selectedStation !== 0)) return
-    if (user?.timeStep) {
-      const endTime =
-        user.timeStep + STATION_DURATION;
-
-      const remainingSeconds = Math.floor(
-        (endTime - Date.now()) / 1000
-      );
-
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTimeLeft(
-        remainingSeconds > 0
-          ? remainingSeconds
-          : 0
-      );
-    } else {
-      setTimeLeft(STATION_DURATION / 1000);
-    }
+    if (user?.timeStep || (!selectedStation && selectedStation !== 0)) return
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
 
           // hết giờ → tự động nộp
-          // eslint-disable-next-line react-hooks/immutability
           handleSubmitStation()
           setIsTimeUp(true)
           return 0
@@ -392,34 +381,6 @@ export default function ConsolidationPage() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStation])
-
-  useEffect(() => {
-    if (user?.endStep || !user || user.timeStep) return
-    const handleTimeStep = async () => {
-      // try {
-      //   const data: UserType = {
-      //     ...user,
-      //     timeStep: Date.now(),
-      //     updatedAt: new Date(),
-      //   }
-      //   await fetch(`/api/users`, {
-      //     method: "PUT",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       classId: user.classId,
-      //       second: true,
-      //     }),
-      //   });
-      //   setUser(data)
-      //   fetchUsers()
-      // } catch (error) {
-      //   console.error("Failed to save user:", error);
-      // }
-    }
-    handleTimeStep()
-  }, [user])
 
   const handleAnswer = (answer: string | string[]) => {
     setAnswers((prev) => ({
@@ -477,11 +438,11 @@ export default function ConsolidationPage() {
     )
   }
 
-
   // const isStationUnlocked = unlockedStations.includes(currentStation)
   // const canShowResults = correctAnswersCount >= 4
 
   const handleUnlockStation = async () => {
+    if(!user) return
     try {
       const res = await fetch('/api/codes')
       const data = await res.json()
@@ -490,7 +451,7 @@ export default function ConsolidationPage() {
       const foundCode = data.find(
         (c: Code) =>
           c.code === unlockCode
-        // && c.stationCode === currentStation + 1
+          && c?.StationCode === currentStation + 1
       )
 
       if (!foundCode) {
@@ -515,43 +476,40 @@ export default function ConsolidationPage() {
           nextStation,
         ])
       }
+      // put time step
+      const data1: UserType = {
+        ...user,
+        timeStep: Date.now(),
+        updatedAt: new Date(),
+      }
+      await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId: user?.classId,
+          continueStep: currentStation,
+          second: true,
+        }),
+      });
 
-      // try {
-      //   const passStep = currentStation + 2
-      //   const data: UserType = {
-      //     ...user,
-      //     passStep,
-      //     updatedAt: new Date(),
-      //   }
-      //   await fetch(`/api/users`, {
-      //     method: "PUT",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       classId: user?.classId,
-      //       passStep,
-      //     }),
-      //   });
-      //   setUser(data)
-      //   fetchUsers()
-      // } catch (error) {
-      //   console.error("Failed to save user:", error);
-      // }
-
-      setShowUnlockDialog(false)
-      setUnlockCode('')
-      toast.success(`Đã mở khóa trạm ${currentStation + 1}!`)
       // put code used
-      // await fetch('/api/codes', {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     code: unlockCode
-      //   })
-      // })
+      await fetch('/api/codes', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          code: unlockCode
+        })
+      })
+
+      setUser(data1)
+      fetchUsers()
+      setShowUnlockDialog(false)
+      toast.success(`Đã mở khóa trạm ${currentStation + 1}!`)
+      setUnlockCode('')
 
     } catch (err) {
       console.log('Failed to fetch codes: ' + err)
@@ -589,11 +547,12 @@ export default function ConsolidationPage() {
 
   const handleSubmitStation = async () => {
     const passed = correctAnswersCount(currentStation) >= 4
-    setScores(prev => {
-      const newScores = [...prev]
-      newScores[currentStation] = correctAnswersCount(currentStation)
-      return newScores
-    })
+    const dataScore = [
+      ...scores
+    ]
+    dataScore[currentStation] = correctAnswersCount(currentStation)
+
+    setScores(dataScore)
     setStationPassed(passed)
     setShowResultModal(true)
     if (!passed) {
@@ -602,35 +561,34 @@ export default function ConsolidationPage() {
         ...prev,
         [currentStation]: true,
       }))
+    }
 
-      // try {
-      //   const endStep = currentStation + 1
-      //   const data: UserType = {
-      //     ...user,
-      //     endStep,
-      //     updatedAt: new Date(),
-      //   }
-      //   await fetch(`/api/users`, {
-      //     method: "PUT",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       classId: user?.classId,
-      //       endStep,
-      //     }),
-      //   });
-      //   setUser(data)
-      //   fetchUsers()
-      // } catch (error) {
-      //   console.error("Failed to save user:", error);
-      // }
+    try {
+      const data: UserType = {
+        ...user!,
+        scoreStep: dataScore,
+        updatedAt: new Date(),
+      }
+      await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId: user?.classId,
+          continueStep: -1,
+          scoreStep: dataScore,
+        }),
+      });
+      setUser(data)
+      fetchUsers()
+    } catch (error) {
+      console.error("Failed to save user:", error);
     }
     setSubmittedStations((prev) => ({
       ...prev,
       [currentStation]: true,
     }))
-
     setSelectedStation(null)
     setTimeLeft(STATION_DURATION / 1000)
   }
