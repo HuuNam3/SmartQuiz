@@ -9,14 +9,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button'
 import MusicPlayer from '@/components/MusicPlayer'
 
+
 const reviewContent = [
   {
     id: 'noi-thuy',
     title: '1. Nội thủy',
-    content: `Theo Luật Biển Việt Nam 2012, tại chương II, điều 9 quy định:
+    content: `Theo Luật Biển Việt Nam 2012, tại chương II, điều 9,10 quy định:
 "Nội thủy là vùng nước tiếp giáp bờ biển, ở phía trong đường cơ sở và là bộ phận lãnh thổ của Việt Nam".
-
-Nội thủy là một phần lãnh thổ của một quốc gia, bao gồm các con sông, hồ, ao, đầm, vùng đầm lầy và các kênh đào, có chiều rộng từ đường cơ sở ở vùng ven biển đến khoảng 12 hải lý (22,2 km).
+Nhà nước thực hiện chủ quyền hoàn toàn, tuyệt đối và đầy đủ đối với nội thủy như trên lãnh thổ đất liền.
 
 Quyền và nghĩa vụ của người dân trong vùng nội thủy:
 • Người dân có quyền sử dụng tài nguyên trong vùng nội thủy để sinh hoạt, sản xuất và phát triển kinh tế.
@@ -99,7 +99,7 @@ export default function ReviewPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
-      <MusicPlayer name="Nen" loop={true}/> 
+      <MusicPlayer name="Nen" loop={true} />
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-br from-red-600 to-rose-600 shadow-lg mb-4 ring-4 ring-yellow-300/70">
@@ -170,28 +170,66 @@ export default function ReviewPage() {
                 <AccordionContent>
                   {item.id === 'noi-thuy' ? (
                     <div className="max-w-4xl mx-auto font-sans">
-                      <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white p-5 rounded-2xl shadow-lg mb-5 border-l-8 border-yellow-400">
-                        <h4 className="text-xl font-bold mb-2">⚖️ Luật Biển Việt Nam 2012</h4>
-                        <p className="italic">
-                          &quot;Nội thủy là vùng nước tiếp giáp bờ biển, ở phía trong đường cơ sở và là bộ phận lãnh thổ của Việt Nam.&quot;
+                      <div className="bg-linear-to-r from-blue-700 via-indigo-800 to-blue-900 text-white p-5 rounded-2xl shadow-xl mb-5 border-l-8 border-yellow-300 ring-2 ring-blue-300/60">
+                        <h4 className="text-xl font-extrabold mb-3 tracking-wide text-yellow-100">📌 Khái niệm</h4>
+                        <p className="mb-2 text-white">
+                          Theo <span className="font-semibold text-amber-300">Luật Biển Việt Nam 2012</span>, tại{' '}
+                          <span className="font-semibold text-amber-300">Chương II, Điều 9 và Điều 10</span> quy định:
+                        </p>
+                        <p className="italic text-white">
+                          <span className="font-semibold text-cyan-300">Nội thủy</span> là vùng nước tiếp giáp bờ biển, ở phía trong{' '}
+                          <span className="font-semibold text-cyan-300">đường cơ sở</span> và là bộ phận{' '}
+                          <span className="font-semibold text-cyan-300">lãnh thổ của Việt Nam</span>.
+                        </p>
+                        <p className="mt-2 text-white">
+                          Nhà nước thực hiện <span className="font-semibold text-rose-300">chủ quyền hoàn toàn, tuyệt đối và đầy đủ</span> đối với{' '}
+                          <span className="font-semibold text-cyan-300">nội thủy</span> như trên lãnh thổ đất liền.
                         </p>
                       </div>
 
-                      <div className="bg-blue-50 p-4 rounded-xl shadow mb-4">
-                        <h4 className="font-semibold text-lg mb-2">📌 Khái niệm</h4>
+                      <div className="mb-5">
+                        <div className="relative w-full aspect-video rounded-xl border border-blue-200 bg-white shadow-sm overflow-hidden">
+                          <Image
+                            src="/phu_yen_1.jpg"
+                            alt="Vùng biển ven bờ Phú Yên - minh họa vùng nội thủy"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 768px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-center text-gray-600 italic">
+                          Bờ biển Phú Yên với nhiều tàu thuyền hoạt động ven bờ.
+                        </p>
+                      </div>
+
+                      <div className="bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 p-4 rounded-xl shadow mb-4 border border-emerald-200">
+                        <h4 className="font-bold text-lg mb-2 text-emerald-800">✅ Quyền của người dân</h4>
                         <p className="text-gray-700">
-                          Nội thủy là một phần lãnh thổ của quốc gia, bao gồm sông, hồ, ao, đầm, vùng đầm lầy và các kênh đào, nằm phía
-                          trong đường cơ sở, với phạm vi khoảng 12 hải lý (22,2 km).
+                          &emsp;Vùng nội thủy là nơi sinh sống và hoạt động của đông đảo người dân, vì vậy Luật Biển Việt Nam quy định rất rõ quyền và nghĩa vụ cụ thể của người dân trong vùng nội thủy:
                         </p>
-                      </div>
-
-                      <div className="bg-green-50 p-4 rounded-xl shadow mb-4">
-                        <h4 className="font-semibold text-lg mb-2">✅ Quyền của người dân</h4>
-                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                          <li>Người dân có quyền sử dụng tài nguyên trong vùng nội thủy để sinh hoạt, sản xuất và phát triển kinh tế</li>
-                          <li>Người dân có nghĩa vụ bảo vệ tài nguyên và môi trường trong vùng nội thủy, đồng thời phải tuân thủ các quy định về bảo vệ môi trường và tài nguyên biển</li>
-                          <li>Người dân cần phải đăng ký và được cấp phép sử dụng tài nguyên trong vùng nội thủy theo quy định của pháp luật</li>
-                          <li>Người dân trong vùng nội thủy có quyền tham gia vào quá trình quản lý và sử dụng tài nguyên trong vùng. Chính phủ và các cơ quan chức năng sẽ tạo điều kiện để người dân tham gia vào các hoạt động như xây dựng kế hoạch quản lý tài nguyên, giám sát hoạt động khai thác và bảo vệ tài nguyên biển</li>
+                        <ul className="mt-3 space-y-2 text-gray-800">
+                          <li className="rounded-lg border border-emerald-200 bg-white/90 px-3 py-2 shadow-sm">
+                            🔹 Người dân có <span className="font-semibold text-blue-700">quyền sử dụng tài nguyên</span> trong vùng nội thủy để{' '}
+                            <span className="font-semibold text-blue-700">sinh hoạt</span>, <span className="font-semibold text-blue-700">sản xuất</span> và{' '}
+                            <span className="font-semibold text-blue-700">phát triển kinh tế</span>
+                          </li>
+                          <li className="rounded-lg border border-emerald-200 bg-white/90 px-3 py-2 shadow-sm">
+                            🔹 Người dân có <span className="font-semibold text-rose-700">nghĩa vụ bảo vệ tài nguyên và môi trường</span> trong vùng nội thủy,
+                            đồng thời phải <span className="font-semibold text-rose-700">tuân thủ các quy định</span> về bảo vệ môi trường và tài nguyên biển
+                          </li>
+                          <li className="rounded-lg border border-emerald-200 bg-white/90 px-3 py-2 shadow-sm">
+                            🔹 Người dân cần phải <span className="font-semibold text-indigo-700">đăng ký</span> và được{' '}
+                            <span className="font-semibold text-indigo-700">cấp phép sử dụng tài nguyên</span> trong vùng nội thủy theo{' '}
+                            <span className="font-semibold text-indigo-700">quy định của pháp luật</span>
+                          </li>
+                          <li className="rounded-lg border border-emerald-200 bg-white/90 px-3 py-2 shadow-sm">
+                            🔹 Người dân trong vùng nội thủy có <span className="font-semibold text-teal-700">quyền tham gia</span> vào quá trình{' '}
+                            <span className="font-semibold text-teal-700">quản lý và sử dụng tài nguyên</span> trong vùng. Chính phủ và các cơ quan chức năng sẽ
+                            tạo điều kiện để người dân tham gia vào các hoạt động như{' '}
+                            <span className="font-semibold text-teal-700">xây dựng kế hoạch quản lý tài nguyên</span>,{' '}
+                            <span className="font-semibold text-teal-700">giám sát hoạt động khai thác</span> và{' '}
+                            <span className="font-semibold text-teal-700">bảo vệ tài nguyên biển</span>
+                          </li>
                         </ul>
                       </div>
 
@@ -214,43 +252,60 @@ export default function ReviewPage() {
                   ) : item.id === 'lanh-hai' ? (
                     <div className="max-w-4xl mx-auto font-sans space-y-4">
                       <div className="bg-linear-to-r from-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-cyan-300">
-                        <h4 className="text-xl font-bold mb-2">🧭 Khái niệm lãnh hải</h4>
+                        <h4 className="text-xl font-bold mb-2">🧭 Khái niệm</h4>
                         <p className="text-white/95">
-                          Theo Luật Biển Việt Nam năm 2012, <strong>Lãnh hải</strong> là vùng biển có chiều rộng <strong>12 hải lý</strong>{' '}
-                          tính từ đường cơ sở ra phía biển. Ranh giới ngoài của lãnh hải là <strong>biên giới quốc gia trên biển</strong> của Việt Nam.
+                          &emsp;Theo <span className="font-semibold text-amber-200">Luật Biển Việt Nam năm 2012</span>,{' '}
+                          <span className="font-semibold text-cyan-200">lãnh hải</span> là vùng biển có chiều rộng{' '}
+                          <span className="font-semibold text-yellow-200">12 hải lý</span> tính từ{' '}
+                          <span className="font-semibold text-cyan-200">đường cơ sở</span> ra phía biển.{' '}
+                          <span className="font-semibold text-cyan-200">Ranh giới ngoài của lãnh hải</span> là{' '}
+                          <span className="font-semibold text-rose-200">biên giới quốc gia trên biển của Việt Nam</span>.
                         </p>
                       </div>
 
-                      <div className="bg-sky-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">⚖️ Chế độ pháp lý (Điều 12 khoản 1)</h4>
-                        <p className="text-gray-700">
-                          Chế độ pháp lý của lãnh hải Nhà nước thực hiện chủ quyền đầy đủ và toàn vẹn đối với lãnh hải, vùng trời trên lãnh hải,
-                          đáy biển và lòng đất dưới đáy biển của lãnh hải phù hợp với Công ước của Liên hợp quốc về Luật Biển năm 1982.
-                        </p>
-                      </div>
-
-                      <div className="bg-emerald-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">🚢 Quyền đi qua không gây hại</h4>
-                        <p className="text-gray-700 mb-3">
-                          Theo Công ước Liên hợp quốc về Luật Biển năm 1982 Điều 17. Quyền đi qua không gây hại Với điều kiện phải tuân theo Công ước này, tàu thuyền của tất cả các quốc gia, có biển hay không có biển, đều được hưởng quyền đi qua không gây hại trong lãnh hải.
-                        </p>
-                        <div className="bg-white/70 border border-emerald-200 rounded-lg p-3">
-                          <p className="text-gray-700">
-                            Việc đi qua phải <strong>liên tục</strong> và <strong>nhanh chóng</strong>. Tuy nhiên, việc đi qua bao gồm cả việc dừng lại và
-                            neo đậu, nhưng chỉ trong chừng mực những việc này là những sự cố thông thường của hành trình hoặc do bất khả kháng hay gặp nạn,
-                            hoặc nhằm cứu giúp người, tàu thuyền hay phương tiện bay gặp nguy hiểm hay bị nạn.
+                      <div className="bg-linear-to-br from-sky-50 to-cyan-50 p-4 rounded-xl shadow border border-sky-200">
+                        <h4 className="font-semibold text-lg mb-3 text-sky-900">⚖️ Chế độ pháp lý của lãnh hải (Điều 12)</h4>
+                        <div className="space-y-2 text-gray-800">
+                          <p className="rounded-lg border border-sky-200 bg-white/90 p-3">
+                            1){' '}
+                            <span className="inline-flex h-4 w-5 items-center justify-center rounded-sm bg-red-600 text-[9px] leading-none text-yellow-300 align-middle mr-1">
+                              ★
+                            </span>
+                            Nhà nước thực hiện <span className="font-semibold text-rose-700">chủ quyền đầy đủ và toàn vẹn</span> đối với{' '}
+                            <span className="font-semibold text-cyan-700">lãnh hải</span>, <span className="font-semibold text-cyan-700">vùng trời</span>,{' '}
+                            <span className="font-semibold text-cyan-700">đáy biển</span> và <span className="font-semibold text-cyan-700">lòng đất dưới đáy biển</span>{' '}
+                            của lãnh hải, phù hợp với <span className="font-semibold text-indigo-700">Công ước Liên hợp quốc về Luật biển năm 1982</span>.
+                          </p>
+                          <p className="rounded-lg border border-sky-200 bg-white/90 p-3">
+                            2) 🚢 <span className="font-semibold text-emerald-700">Tàu thuyền của tất cả các quốc gia</span> được hưởng{' '}
+                            <span className="font-semibold text-emerald-700">quyền đi qua không gây hại</span> trong lãnh hải Việt Nam. Đối với{' '}
+                            <span className="font-semibold text-amber-700">tàu quân sự nước ngoài</span>, khi thực hiện quyền này phải{' '}
+                            <span className="font-semibold text-amber-700">thông báo trước</span> cho cơ quan có thẩm quyền của Việt Nam.
+                          </p>
+                          <p className="rounded-lg border border-sky-200 bg-white/90 p-3">
+                            3) 🕊️ Việc đi qua không gây hại của tàu thuyền nước ngoài phải thực hiện trên cơ sở{' '}
+                            <span className="font-semibold text-violet-700">tôn trọng hòa bình, độc lập, chủ quyền, pháp luật Việt Nam</span> và{' '}
+                            <span className="font-semibold text-violet-700">điều ước quốc tế</span> mà Việt Nam là thành viên.
+                          </p>
+                          <p className="rounded-lg border border-sky-200 bg-white/90 p-3">
+                            4) ✈️ <span className="font-semibold text-fuchsia-700">Phương tiện bay nước ngoài</span> không được vào vùng trời trên lãnh hải Việt Nam,
+                            trừ trường hợp được sự đồng ý của Chính phủ Việt Nam hoặc thực hiện theo điều ước quốc tế mà Việt Nam là thành viên.
+                          </p>
+                          <p className="rounded-lg border border-sky-200 bg-white/90 p-3">
+                            5) 🏺 Nhà nước có <span className="font-semibold text-rose-700">chủ quyền</span> đối với mọi loại{' '}
+                            <span className="font-semibold text-rose-700">hiện vật khảo cổ, lịch sử</span> trong lãnh hải Việt Nam.
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-2">
+                      <div className="">
                         <div className="relative w-full aspect-video rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
                           <Image
                             src="/lanhquyen.png"
                             alt="Minh họa lãnh hải và chủ quyền"
                             fill
                             sizes="(max-width: 768px) 100vw, 768px"
-                            className="object-contain"
+                            className="object-cover"
                           />
                         </div>
                         <p className="mt-2 text-sm text-center text-gray-600 italic">
@@ -259,43 +314,143 @@ export default function ReviewPage() {
                       </div>
                     </div>
                   ) : item.id === 'vung-tiep-giap' ? (
-                    <div className="max-w-4xl mx-auto font-sans space-y-4">
-                      <div className="bg-linear-to-r from-cyan-600 to-teal-700 text-white p-5 rounded-2xl shadow-lg border-l-8 border-emerald-300">
-                        <h4 className="text-xl font-bold mb-2">🌐 Khái niệm vùng tiếp giáp lãnh hải</h4>
-                        <p className="text-white/95">
-                          Vùng tiếp giáp lãnh hải là vùng biển nằm liền kề bên ngoài lãnh hải, chồng lấn với vùng đặc quyền kinh tế và thềm lục địa.
+                    <div className="max-w-4xl mx-auto font-sans">
+
+                      {/* Tiêu đề */}
+                      <div className="bg-linear-to-r from-blue-700 via-indigo-800 to-blue-900 text-white p-5 rounded-2xl shadow-xl mb-5 border-l-8 border-yellow-300 ring-2 ring-blue-300/60">
+                        <h3 className="text-xl font-extrabold mb-3 tracking-wide text-yellow-100">
+                          🌊 VÙNG TIẾP GIÁP LÃNH HẢI
+                        </h3>
+
+                        <p>
+                          📜 Theo{' '}
+                          <span className="font-bold text-yellow-300">
+                            Luật Biển Việt Nam năm 2012
+                          </span>
                         </p>
                       </div>
 
-                      <div className="bg-cyan-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">📍 Vị trí địa lý</h4>
-                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                          <li>Vị trí: Nằm ngoài lãnh hải và tiếp liền với lãnh hải.</li>
-                          <li>Chiều rộng: Không quá 24 hải lý tính từ đường cơ sở dùng để tính chiều rộng lãnh hải.</li>
-                          <li>Khoảng cách: Vùng này rộng 12 hải lý tính từ ranh giới phía ngoài của lãnh hải.</li>
-                          <li>Vị trí so với các vùng biển khác: Chồng lấn với vùng đặc quyền kinh tế và thềm lục địa.</li>
-                        </ul>
-                      </div>
+                      {/* Khái niệm */}
+                      <div className="bg-blue-50 p-4 rounded-xl shadow border border-blue-200 mb-4">
+                        <h4 className="font-bold text-lg text-blue-800">
+                          📘 Khái niệm vùng tiếp giáp lãnh hải
+                        </h4>
 
-                      <div className="bg-teal-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">🛡️ Vai trò và nhiệm vụ kiểm soát</h4>
-                        <p className="text-gray-700 mb-3">
-                          Đây là khu vực chuyển tiếp quan trọng, nơi quốc gia ven biển thực hiện các biện pháp an ninh, quốc phòng và bảo vệ các quyền lợi chuyên biệt.
+                        <p className="mt-2">
+                          <span className="font-semibold text-blue-900">
+                            Vùng tiếp giáp lãnh hải
+                          </span>{' '}
+                          là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, có chiều rộng{' '}
+                          <span className="font-bold text-blue-900">
+                            🌊 12 hải lý
+                          </span>{' '}
+                          tính từ{' '}
+                          <span className="font-semibold text-indigo-900">
+                            ranh giới ngoài của lãnh hải
+                          </span>.
                         </p>
-                        <div className="bg-white/70 border border-teal-200 rounded-lg p-3">
-                          <p className="text-gray-700 mb-2">
-                            Theo Điều 48 Luật Biển Việt Nam 2012, lực lượng tuần tra, kiểm soát trên biển có nhiệm vụ:
-                          </p>
-                          <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                            <li>Bảo vệ chủ quyền, quyền chủ quyền, quyền tài phán và lợi ích quốc gia.</li>
-                            <li>Bảo đảm thi hành pháp luật Việt Nam.</li>
-                            <li>Bảo vệ tài sản nhà nước, tài nguyên và môi trường biển.</li>
-                            <li>Tham gia tìm kiếm cứu nạn, cứu hộ.</li>
-                            <li>Xử lý các hành vi vi phạm pháp luật trên các vùng biển, đảo của Việt Nam.</li>
-                          </ul>
-                        </div>
                       </div>
 
+                      {/* Điều 14 */}
+                      <div className="bg-yellow-50 p-4 rounded-xl shadow border border-yellow-200 mb-4">
+                        <h4 className="font-bold text-lg">
+                          ⚖️ Điều 14. Chế độ pháp lý của vùng tiếp giáp lãnh hải
+                        </h4>
+
+                        <p className="mt-2">
+                          1. Nhà nước thực hiện{' '}
+                          <span className="font-semibold text-blue-900">
+                            quyền chủ quyền
+                          </span>,{' '}
+                          <span className="font-semibold text-indigo-900">
+                            quyền tài phán quốc gia
+                          </span>{' '}
+                          và các quyền khác quy định tại Điều 16 của Luật này đối với{' '}
+                          <span className="font-semibold text-blue-900">
+                            vùng tiếp giáp lãnh hải
+                          </span>.
+                        </p>
+
+                        <p className="mt-2">
+                          Như:
+                        </p>
+
+                        <p className="mt-2">
+                          -{' '}
+                          <span className="font-semibold text-blue-900">
+                            Quyền chủ quyền
+                          </span>{' '}
+                          về việc thăm dò, khai thác, quản lý và bảo tồn tài nguyên thuộc vùng nước bên trên đáy biển, đáy biển và lòng đất dưới đáy biển; về các hoạt động khác nhằm thăm dò, khai thác vùng này vì mục đích kinh tế;
+                        </p>
+
+                        <p className="mt-2">
+                          -{' '}
+                          <span className="font-semibold text-indigo-900">
+                            Quyền tài phán quốc gia
+                          </span>{' '}
+                          về lắp đặt và sử dụng đảo nhân tạo, thiết bị và công trình trên biển; nghiên cứu khoa học biển, bảo vệ và gìn giữ môi trường biển;
+                        </p>
+
+                        <p className="mt-2">
+                          2. Nhà nước thực hiện{' '}
+                          <span className="font-semibold text-amber-800">
+                            kiểm soát
+                          </span>{' '}
+                          trong{' '}
+                          <span className="font-semibold text-blue-900">
+                            vùng tiếp giáp lãnh hải
+                          </span>{' '}
+                          nhằm{' '}
+                          <span className="font-semibold text-indigo-900">
+                            ngăn ngừa và xử lý hành vi vi phạm pháp luật
+                          </span>{' '}
+                          về{' '}
+                          <span className="font-semibold text-blue-900">
+                            hải quan, thuế, y tế, xuất nhập cảnh
+                          </span>{' '}
+                          xảy ra trên lãnh thổ hoặc trong lãnh hải Việt Nam.
+                        </p>
+                      </div>
+
+                      {/* Quyền truy đuổi */}
+                      <div className="bg-red-50 p-4 rounded-xl shadow border border-red-200">
+                        <h4 className="font-bold text-lg text-red-700">
+                          🚨 Quyền truy đuổi tàu thuyền trên biển
+                        </h4>
+
+                        <p className="mt-2">
+                          Theo{' '}
+                          <span className="font-semibold text-blue-900">
+                            Điều 41 Luật Biển Việt Nam 2012
+                          </span>:
+                        </p>
+
+                        <p className="mt-2">
+                          1. Lực lượng tuần tra, kiểm soát trên biển có{' '}
+                          <span className="font-semibold text-indigo-900">
+                            quyền truy đuổi
+                          </span>{' '}
+                          tàu thuyền nước ngoài vi phạm các quy định của pháp luật Việt Nam nếu tàu thuyền này đang ở trong{' '}
+                          <span className="font-semibold text-blue-900">
+                            nội thủy, lãnh hải và vùng tiếp giáp lãnh hải Việt Nam
+                          </span>.
+                        </p>
+
+                        <p className="mt-2">
+                          Quyền truy đuổi được tiến hành sau khi lực lượng tuần tra, kiểm soát trên biển đã phát tín hiệu yêu cầu tàu thuyền vi phạm hay có dấu hiệu vi phạm pháp luật{' '}
+                          <span className="font-semibold text-red-700">
+                            dừng lại để tiến hành kiểm tra
+                          </span>{' '}
+                          nhưng tàu thuyền đó không chấp hành.
+                        </p>
+
+                        <p className="mt-2">
+                          Việc truy đuổi có thể được tiếp tục ở ngoài ranh giới của lãnh hải hay vùng tiếp giáp lãnh hải Việt Nam nếu được tiến hành{' '}
+                          <span className="font-semibold text-red-700">
+                            liên tục, không ngắt quãng
+                          </span>.
+                        </p>
+                      </div>
                       <div className="mt-2">
                         <div className="relative w-full aspect-video rounded-lg border border-cyan-100 bg-white shadow-sm overflow-hidden">
                           <Image
@@ -303,7 +458,7 @@ export default function ReviewPage() {
                             alt="Minh họa vùng tiếp giáp lãnh hải"
                             fill
                             sizes="(max-width: 768px) 100vw, 768px"
-                            className="object-contain"
+                            className="object-cover"
                           />
                         </div>
                         <p className="mt-2 text-sm text-center text-gray-600 italic">
@@ -312,35 +467,187 @@ export default function ReviewPage() {
                       </div>
                     </div>
                   ) : item.id === 'vung-dac-quyen' ? (
-                    <div className="max-w-4xl mx-auto font-sans space-y-4">
-                      <div className="bg-linear-to-r from-sky-700 to-blue-800 text-white p-5 rounded-2xl shadow-lg border-l-8 border-blue-300">
-                        <h4 className="text-xl font-bold mb-2">⚖️ Cơ sở pháp lý</h4>
-                        <p className="text-white/95">Theo Luật số 18/2012/QH13 - Luật Biển Việt Nam năm 2012.</p>
-                      </div>
+                    <div className="max-w-4xl mx-auto font-sans">
 
-                      <div className="bg-blue-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">🌊 Điều 15 - Vùng đặc quyền kinh tế</h4>
-                        <p className="text-gray-700">
-                          Vùng đặc quyền kinh tế là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, hợp với lãnh hải thành một vùng biển có chiều rộng 200 hải lý tính từ đường cơ sở.
+                      {/* Tiêu đề */}
+                      <div className="bg-linear-to-r from-blue-700 via-indigo-800 to-blue-900 text-white p-5 rounded-2xl shadow-xl mb-5 border-l-8 border-yellow-300 ring-2 ring-blue-300/60">
+                        <h3 className="text-xl font-extrabold mb-3 tracking-wide text-yellow-100">
+                          🌊 VÙNG ĐẶC QUYỀN KINH TẾ & THỀM LỤC ĐỊA
+                        </h3>
+
+                        <p>
+                          📜 Theo{' '}
+                          <span className="font-bold text-yellow-300">
+                            Luật số: 18/2012/QH13
+                          </span>{' '}
+                          Luật Biển Việt Nam năm 2012
                         </p>
                       </div>
 
-                      <div className="bg-indigo-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">🧭 Điều 17 - Thềm lục địa.</h4>
-                        <p className="text-gray-700">
-                          Thềm lục địa là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến mép ngoài của rìa lục địa.
+                      {/* Điều 15 */}
+                      <div className="bg-blue-50 p-4 rounded-xl shadow border border-blue-200 mb-4">
+                        <h4 className="font-bold text-lg text-blue-800">
+                          📘 Điều 15. Vùng đặc quyền kinh tế
+                        </h4>
+
+                        <p className="mt-2">
+                          Vùng đặc quyền kinh tế là vùng biển tiếp liền và nằm ngoài lãnh hải Việt Nam, hợp với lãnh hải thành một vùng biển có chiều rộng{' '}
+                          <span className="font-bold text-blue-900">
+                            🌊 200 hải lý
+                          </span>{' '}
+                          tính từ{' '}
+                          <span className="font-semibold text-indigo-900">
+                            đường cơ sở
+                          </span>.
                         </p>
                       </div>
 
-                      <div className="bg-emerald-50 p-4 rounded-xl shadow">
-                        <h4 className="font-semibold text-lg mb-2">✅ Quyền của quốc gia ven biển</h4>
-                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                          <li>Quyền chủ quyền về thăm dò, khai thác, bảo tồn và quản lý tài nguyên thiên nhiên.</li>
-                          <li>Quyền tài phán về lắp đặt công trình, nghiên cứu khoa học biển, bảo vệ môi trường biển.</li>
-                          <li>Các quyền và nghĩa vụ khác theo Công ước Luật Biển 1982.</li>
-                        </ul>
+                      {/* Điều 17 */}
+                      <div className="bg-white p-4 rounded-xl shadow border border-blue-200 mb-4">
+                        <h4 className="font-bold text-lg text-blue-800">
+                          🧭 Điều 17. Thềm lục địa
+                        </h4>
+
+                        <p className="mt-2">
+                          <span className="font-semibold text-blue-900">
+                            Thềm lục địa
+                          </span>{' '}
+                          là vùng đáy biển và lòng đất dưới đáy biển, tiếp liền và nằm ngoài lãnh hải Việt Nam, trên toàn bộ phần kéo dài tự nhiên của lãnh thổ đất liền, các đảo và quần đảo của Việt Nam cho đến{' '}
+                          <span className="font-semibold text-indigo-900">
+                            mép ngoài của rìa lục địa
+                          </span>.
+                        </p>
                       </div>
 
+                      {/* Điều 16 */}
+                      <div className="bg-yellow-50 p-4 rounded-xl shadow border border-yellow-200 mb-4">
+                        <h4 className="font-bold text-lg">
+                          ⚖️ Điều 16. Chế độ pháp lý của vùng đặc quyền kinh tế
+                        </h4>
+
+                        <p className="mt-2">
+                          1. Trong vùng đặc quyền kinh tế, Nhà nước thực hiện:
+                        </p>
+
+                        <p className="mt-2">
+                          a){' '}
+                          <span className="font-semibold text-blue-900">
+                            🔑 Quyền chủ quyền
+                          </span>{' '}
+                          về việc thăm dò, khai thác, quản lý và bảo tồn tài nguyên thuộc vùng nước bên trên đáy biển, đáy biển và lòng đất dưới đáy biển; về các hoạt động khác nhằm thăm dò, khai thác vùng này vì mục đích kinh tế;
+                        </p>
+
+                        <p className="mt-2">
+                          b){' '}
+                          <span className="font-semibold text-indigo-900">
+                            🏛️ Quyền tài phán quốc gia
+                          </span>{' '}
+                          về lắp đặt và sử dụng đảo nhân tạo, thiết bị và công trình trên biển; nghiên cứu khoa học biển, bảo vệ và gìn giữ môi trường biển;
+                        </p>
+
+                        <p className="mt-2">
+                          c){' '}
+                          <span className="font-semibold text-amber-800">
+                            🌐 Các quyền và nghĩa vụ khác
+                          </span>{' '}
+                          phù hợp với pháp luật quốc tế.
+                        </p>
+
+                        <p className="mt-3">
+                          2. Nhà nước tôn trọng quyền tự do hàng hải, hàng không; quyền đặt dây cáp, ống dẫn ngầm và hoạt động sử dụng biển hợp pháp của các quốc gia khác trong{' '}
+                          <span className="font-semibold text-blue-900">
+                            vùng đặc quyền kinh tế của Việt Nam
+                          </span>{' '}
+                          theo quy định của Luật này và{' '}
+                          <span className="font-semibold text-indigo-900">
+                            điều ước quốc tế
+                          </span>{' '}
+                          mà nước Cộng hòa xã hội chủ nghĩa Việt Nam là thành viên, không làm phương hại đến quyền chủ quyền, quyền tài phán quốc gia và lợi ích quốc gia trên biển của Việt Nam.
+                        </p>
+
+                        <p className="mt-2">
+                          ⚠️ Việc lắp đặt dây cáp và ống dẫn ngầm phải có{' '}
+                          <span className="font-bold text-red-700">
+                            sự chấp thuận bằng văn bản
+                          </span>{' '}
+                          của{' '}
+                          <span className="font-semibold text-red-700">
+                            cơ quan nhà nước có thẩm quyền của Việt Nam
+                          </span>.
+                        </p>
+                      </div>
+
+                      {/* Điều 18 */}
+                      <div className="bg-red-50 p-4 rounded-xl shadow border border-red-200">
+                        <h4 className="font-bold text-lg text-red-700">
+                          📌 Điều 18. Chế độ pháp lý của thềm lục địa
+                        </h4>
+
+                        <p className="mt-2">
+                          1. Nhà nước thực hiện{' '}
+                          <span className="font-semibold text-blue-900">
+                            quyền chủ quyền
+                          </span>{' '}
+                          đối với{' '}
+                          <span className="font-semibold text-indigo-900">
+                            thềm lục địa
+                          </span>{' '}
+                          về thăm dò, khai thác tài nguyên.
+                        </p>
+
+                        <p className="mt-2">
+                          2. Quyền chủ quyền quy định tại khoản 1 Điều này có tính chất đặc quyền,{' '}
+                          <span className="font-bold text-red-700">
+                            🚫 không ai có quyền
+                          </span>{' '}
+                          tiến hành hoạt động thăm dò thềm lục địa hoặc khai thác tài nguyên của thềm lục địa nếu không có{' '}
+                          <span className="font-bold text-red-700">
+                            sự đồng ý của Chính phủ Việt Nam
+                          </span>.
+                        </p>
+
+                        <p className="mt-2">
+                          3. Nhà nước có quyền{' '}
+                          <span className="font-semibold text-blue-900">
+                            khai thác lòng đất dưới đáy biển
+                          </span>, cho phép và quy định việc khoan nhằm bất kỳ mục đích nào ở{' '}
+                          <span className="font-semibold text-indigo-900">
+                            thềm lục địa
+                          </span>.
+                        </p>
+
+                        <p className="mt-2">
+                          4. Nhà nước tôn trọng quyền đặt dây cáp, ống dẫn ngầm và hoạt động sử dụng biển hợp pháp khác của các quốc gia khác ở{' '}
+                          <span className="font-semibold text-blue-900">
+                            thềm lục địa Việt Nam
+                          </span>{' '}
+                          theo quy định của Luật này và các{' '}
+                          <span className="font-semibold text-indigo-900">
+                            điều ước quốc tế
+                          </span>{' '}
+                          mà nước Cộng hòa xã hội chủ nghĩa Việt Nam là thành viên.
+                        </p>
+
+                        <p className="mt-2">
+                          ⚠️ Việc lắp đặt dây cáp và ống dẫn ngầm phải có{' '}
+                          <span className="font-bold text-red-700">
+                            sự chấp thuận bằng văn bản
+                          </span>{' '}
+                          của cơ quan nhà nước có thẩm quyền của Việt Nam.
+                        </p>
+
+                        <p className="mt-2">
+                          5. Tổ chức, cá nhân nước ngoài được tham gia thăm dò, sử dụng, khai thác tài nguyên, nghiên cứu khoa học, lắp đặt thiết bị và công trình ở{' '}
+                          <span className="font-semibold text-indigo-900">
+                            thềm lục địa của Việt Nam
+                          </span>{' '}
+                          trên cơ sở{' '}
+                          <span className="font-semibold text-amber-800">
+                            điều ước quốc tế
+                          </span>{' '}
+                          mà nước Cộng hòa xã hội chủ nghĩa Việt Nam là thành viên.
+                        </p>
+                      </div>
                       <div className="mt-2">
                         <div className="relative w-full aspect-video rounded-lg border border-blue-100 bg-white shadow-sm overflow-hidden">
                           <Image
@@ -348,7 +655,7 @@ export default function ReviewPage() {
                             alt="Minh họa vùng đặc quyền kinh tế và thềm lục địa"
                             fill
                             sizes="(max-width: 768px) 100vw, 768px"
-                            className="object-contain"
+                            className="object-cover"
                             priority
                           />
                         </div>
@@ -417,7 +724,7 @@ export default function ReviewPage() {
             className="px-8 py-6 text-lg font-semibold bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
             onClick={() => router.push('/consolidation')}
           >
-            Làm bài tập vượt các trạm
+            Bắt đầu Hải Trình Kì Bí
           </Button>
         </div>
       </div>

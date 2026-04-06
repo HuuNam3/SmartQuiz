@@ -1,25 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+// import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { useUser } from '@/context/user-context'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+// import { useUser } from '@/context/user-context'
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from '@/components/ui/alert-dialog'
+import { Anchor } from 'lucide-react'
+
 
 export default function Navigation() {
   const pathname = usePathname()
-  const router = useRouter()
-  const { user } = useUser()
+  // const router = useRouter()
+  // const { user } = useUser()
 
   // Ẩn navigation khi đang làm bài trắc nghiệm
   if (pathname === '/quiz') {
@@ -61,12 +63,11 @@ export default function Navigation() {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+              <div className="w-10 h-10 rounded-full bg-[#1bfd14] flex items-center justify-center">
+                <Anchor className="text-[#fcee17] w-full h-full" />
+                {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 64a32 32 0 1 0 0 64 32 32 0 1 0 0-64zM192 96c0-53 43-96 96-96s96 43 96 96c0 41.8-26.7 77.4-64 90.5l0 257.9c62.9-14.3 110.2-69.7 111.9-136.5l-16.1 14.1c-10 8.7-25.1 7.7-33.9-2.3s-7.7-25.1 2.3-33.9l64-56c9-7.9 22.6-7.9 31.6 0l64 56c10 8.7 11 23.9 2.3 33.9s-23.9 11-33.9 2.3L496 307.9C493.9 421 401.6 512 288 512S82.1 421 80 307.9L63.8 322.1c-10 8.7-25.1 7.7-33.9-2.3s-7.7-25.1 2.3-33.9l64-56c9-7.9 22.6-7.9 31.6 0l64 56c10 8.7 11 23.9 2.3 33.9s-23.9 11-33.9 2.3l-16.1-14.1c1.8 66.8 49.1 122.2 111.9 136.5l0-257.9c-37.3-13.2-64-48.7-64-90.5z" /></svg> */}
               </div>
-              <span className="text-2xl font-bold">Củng cố bài học</span>
+              <span className="text-2xl font-bold"> Củng cố bài học</span>
             </div>
             <div className="flex gap-6">
               {links.map((link) => (
@@ -87,7 +88,7 @@ export default function Navigation() {
             </div>
           </div>
         </div>
-      </nav>
+      </nav >
 
       {/* <AlertDialog open={showQuizWarning} onOpenChange={setShowQuizWarning}>
         <AlertDialogContent>

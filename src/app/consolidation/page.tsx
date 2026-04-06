@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Brain, Star, Send, AlertCircle } from 'lucide-react'
+import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2, Lock, Unlock, Trash2, Star, Send, AlertCircle, Ship } from 'lucide-react'
 import { useUser, UserType } from '@/context/user-context'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -609,12 +609,13 @@ export default function ConsolidationPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <Brain className="w-8 h-8 text-blue-600" />
+            <Ship className="w-8 h-8 text-blue-600" />
             <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Củng Cố Kiến Thức
+              Hải Trình Kỳ Bí - Vượt Sóng Ra Khơi
             </h1>
+            <Ship className="w-8 h-8 text-purple-600" />
           </div>
-          <p className="text-gray-600">Chinh phục 4 trạm học tập với các câu hỏi kéo thả sáng tạo</p>
+          <p className="text-gray-600 italic ">Theo dấu bản đồ – Khám phá biển đảo quê hương 🗺️</p>
         </div>
 
         {/* Stations Navigation */}
