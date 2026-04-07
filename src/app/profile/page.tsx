@@ -31,6 +31,16 @@ export default function ProfilePage() {
     return null
   }
 
+  const totalScore = (): number => {
+    let total = 0
+    user.scoreStep?.forEach(idx => {
+      if (idx >= 4) {
+        total++
+      }
+    })
+    return total + user.score
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-rose-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
@@ -112,31 +122,31 @@ export default function ProfilePage() {
                   <p className="text-sm opacity-90 mb-1">Số câu đúng</p>
                   <p className="text-3xl font-bold">{user.score}/6</p>
                 </div>
-                <div className={`p-4 rounded-xl text-white text-center ${(user.score / 6) * 100 >= 80
+                <div className={`p-4 rounded-xl text-white text-center ${(totalScore() / 10) * 100 >= 80
                   ? 'bg-linear-to-br from-emerald-500 to-green-600'
-                  : (user.score / 6) * 100 >= 50
+                  : (totalScore() / 10) * 100 >= 50
                     ? 'bg-linear-to-br from-amber-500 to-orange-600'
                     : 'bg-linear-to-br from-red-500 to-rose-600'
                   }`}>
-                  <p className="text-sm opacity-90 mb-1">Điểm số</p>
+                  <p className="text-sm opacity-90 mb-1">Tổng Điểm số</p>
                   <p className="text-3xl font-bold">
-                    {((user.score / 10) * 10).toFixed(1)}
+                    {totalScore()}
                   </p>
                 </div>
               </div>
 
-              <div className={`p-4 rounded-xl text-center ${(user.score / 6) * 100 >= 80
+              <div className={`p-4 rounded-xl text-center ${(totalScore() / 10) * 100 >= 80
                 ? 'bg-emerald-50 border-2 border-emerald-200'
-                : (user.score / 6) * 100 >= 50
+                : (totalScore() / 10) * 100 >= 50
                   ? 'bg-amber-50 border-2 border-amber-200'
                   : 'bg-red-50 border-2 border-red-200'
                 }`}>
-                <p className={`text-lg font-semibold ${(user.score / 6) * 100 >= 80 ? 'text-emerald-700' :
-                  (user.score / 6) * 100 >= 50 ? 'text-amber-700' : 'text-red-700'
+                <p className={`text-lg font-semibold ${(totalScore() / 10) * 100 >= 80 ? 'text-emerald-700' :
+                  (totalScore() / 10) * 100 >= 50 ? 'text-amber-700' : 'text-red-700'
                   }`}>
-                  {(user.score / 6) * 100 >= 80
+                  {(totalScore() / 10) * 100 >= 80
                     ? 'Xuất sắc! Bạn đã nắm vững kiến thức.'
-                    : (user.score / 6) * 100 >= 50
+                    : (totalScore() / 10) * 100 >= 50
                       ? 'Khá tốt! Hãy tiếp tục ôn tập thêm.'
                       : 'Cần cố gắng thêm! Hãy xem lại phần ôn tập.'}
                 </p>

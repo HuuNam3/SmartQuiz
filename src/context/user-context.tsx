@@ -8,6 +8,7 @@ export type UserType = {
   admin?: boolean
   group: number
   score: number
+  ping: number
   timeStep?: number
   continueStep?: number
   scoreStep?: number[]

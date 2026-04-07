@@ -52,17 +52,17 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { classId, score, group, scoreStep, continueStep, first, second } = body;
+    const { classId, score, scoreStep, continueStep, first, second, ping } = body;
 
     const db = await getDb();
     const users = db.collection("users");
     let result;
-    if (group) {
+    if (ping) {
       result = await users.updateOne(
         { classId: classId },
         {
           $set: {
-            group,
+            ping: Date.now(),
             updatedAt: new Date(),
           },
         },

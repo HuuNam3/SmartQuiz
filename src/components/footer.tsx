@@ -17,9 +17,9 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-bold mb-3">Liên Kết Nhanh</h3>
             <ul className="space-y-2 text-sm text-blue-200">
-              <li><a href="/" className="hover:text-white transition">Trang Chủ</a></li>
-              <li><a href="/quiz" className="hover:text-white transition">Trắc Nghiệm</a></li>
-              <li><a href="/profile" className="hover:text-white transition">Hồ Sơ Học Sinh</a></li>
+              <li>Trang Chủ</li>
+              <li>Trắc Nghiệm</li>
+              <li>Hồ Sơ Học Sinh</li>
             </ul>
           </div>
 

@@ -35,14 +35,37 @@ export default function Home() {
   const router = useRouter()
   const { fetchUsers, user, users, clearUser, setUser } = useUser()
 
-
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (!user) return
+    const interval = setInterval(() => {
+      fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId: user.classId,
+          ping: true,
+        }),
+      })
+    }, 30 * 1000)
+
+    return () => clearInterval(interval)
+  }, [user])
 
   const getScore = (score?: number) => {
     if (score === undefined || score === -1) return ''
     return score
+  }
+
+  const totalScore = (userScore: UserType): number => {
+    let total = 0
+    userScore.scoreStep?.forEach(idx => {
+      if (idx >= 4) {
+        total++
+      }
+    })
+    return total + userScore.score
   }
 
   const exportToExcel = () => {
@@ -82,6 +105,7 @@ export default function Home() {
           'Điểm trạm 3': getScore(record?.scoreStep?.[2]),
           'Điểm trạm 4': getScore(record?.scoreStep?.[3]),
           'Điểm ôn tập': record.score,
+          'Tổng điểm': totalScore(record),
 
           'Ngày làm bài': start
             ? start.toLocaleDateString('vi-VN')
@@ -122,6 +146,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    fetchUsers()
 
     // chuẩn hóa input
     const normalizedClassId = classId.trim().toLowerCase()
@@ -132,17 +157,36 @@ export default function Home() {
     )
 
     clearUser()
-
     if (!findUser) {
       toast.error('Mã nhóm chưa đúng!')
       return
+    }
+
+    if (findUser?.ping && !findUser?.admin) {
+      const now = Date.now()
+      const isOnline = (now - Number(new Date(findUser.ping))) < 60 * 1000
+      console.log(isOnline)
+      if (isOnline) {
+        toast.error('Mã đã được sử dụng ở nơi khác!')
+        return
+      } else {
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: findUser.classId,
+            ping: true,
+          }),
+        })
+      }
     }
 
     toast.success('xác nhận mã nhóm thành công!')
     if (classId !== 'admin333') {
       router.push('/review')
     }
-    fetchUsers()
     setUser(findUser)
   }
 
