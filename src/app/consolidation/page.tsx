@@ -486,28 +486,33 @@ export default function ConsolidationPage() {
         timeStep: Date.now(),
         updatedAt: new Date(),
       }
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: user?.classId,
-          continueStep: currentStation,
-          second: true,
-        }),
-      });
+      if (!user.admin) {
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: user?.classId,
+            continueStep: currentStation,
+            second: true,
+          }),
+        });
+
+      }
 
       // put code used
-      await fetch('/api/codes', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          code: unlockCode
+      if (!user.admin) {
+        await fetch('/api/codes', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code: unlockCode
+          })
         })
-      })
+      }
 
       setUser(data1)
       fetchUsers()
@@ -550,6 +555,7 @@ export default function ConsolidationPage() {
   }
 
   const handleSubmitStation = async () => {
+    if(!user) return
     const passed = correctAnswersCount(currentStation) >= 4
     const dataScore = [
       ...scores
@@ -573,17 +579,19 @@ export default function ConsolidationPage() {
         scoreStep: dataScore,
         updatedAt: new Date(),
       }
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: user?.classId,
-          continueStep: -1,
-          scoreStep: dataScore,
-        }),
-      });
+      if (!user.admin) {
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: user?.classId,
+            continueStep: -1,
+            scoreStep: dataScore,
+          }),
+        });
+      }
       setUser(data)
       fetchUsers()
     } catch (error) {

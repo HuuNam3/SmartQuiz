@@ -167,7 +167,7 @@ export default function Home() {
   }
 
   const handleVerifyAccessCode = async () => {
-
+    if (!user) return
     if (accessCode !== QUIZ_ACCESS_CODE) {
       toast.warning('Mã chưa chính xác!')
       return
@@ -186,20 +186,22 @@ export default function Home() {
         score: 0,
       }
 
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: user?.classId,
-          score: 0,
-          first: true,
-        }),
-      })
+      if (!user.admin) {
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: user?.classId,
+            score: 0,
+            first: true,
+          }),
+        })
+      }
+
 
       setUser(data)
-
       setShowAccessCodeDialog(false)
       setAccessCode('')
       setAccessError('')

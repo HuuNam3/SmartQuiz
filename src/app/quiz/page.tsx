@@ -177,26 +177,27 @@ export default function QuizPage() {
     if (!isTimeUp || !user) return
     const finalScore = calculateScore()
 
-    const submitQuiz = async () => {
-      try {
-        await fetch(`/api/users`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            classId: user.classId,
-            score: finalScore,
-            first: false,
-          }),
-        });
-        fetchUsers()
-      } catch (error) {
-        console.error("Failed to save user:", error);
+    if (!user.admin) {
+      const submitQuiz = async () => {
+        try {
+          await fetch(`/api/users`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              classId: user.classId,
+              score: finalScore,
+              first: false,
+            }),
+          });
+          fetchUsers()
+        } catch (error) {
+          console.error("Failed to save user:", error);
+        }
       }
+      submitQuiz()
     }
-
-    submitQuiz()
   }, [isTimeUp, calculateScore, user, fetchUsers])
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -288,32 +289,34 @@ export default function QuizPage() {
 
   const handleConfirmSubmit = async () => {
     if (!user) return
-    try {
-      const finalScore = calculateScore()
-      const data: UserType = {
-        ...user,
-        endTime: Date.now(),
-        score: finalScore,
-        updatedAt: new Date(),
-      }
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: user.classId,
+    if (!user.admin) {
+      try {
+        const finalScore = calculateScore()
+        const data: UserType = {
+          ...user,
+          endTime: Date.now(),
           score: finalScore,
-          first: false,
-        }),
-      });
-      setUser(data)
-      setShowSubmitConfirm(false)
-      setShowScore(true)
-      fetchUsers()
-    } catch (error) {
-      console.error("Failed to save user:", error);
+          updatedAt: new Date(),
+        }
+        await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classId: user.classId,
+            score: finalScore,
+            first: false,
+          }),
+        });
+        setUser(data)
+        fetchUsers()
+      } catch (error) {
+        console.error("Failed to save user:", error);
+      }
     }
+    setShowSubmitConfirm(false)
+    setShowScore(true)
   }
 
   const handleGoToProfile = () => {

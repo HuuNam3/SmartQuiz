@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const { user, clearUser, users, setUser } = useUser()
 
   useEffect(() => {
-    if (!user) {
+    if (!user || user.admin) {
       router.push('/')
     }
 
