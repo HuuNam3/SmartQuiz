@@ -375,10 +375,10 @@ export default function QuizPage() {
               {user.score >= 5 && (
                 <p className="text-lg font-bold text-yellow-600 mb-2">Xuất sắc! 🎉</p>
               )}
-              <p className="text-gray-500 text-sm">Mỗi học sinh chỉ được làm bài 1 lần</p>
+              <p className="text-gray-500 text-sm">Mỗi nhóm chỉ được làm bài 1 lần</p>
 
               <div className="p-8 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl mb-6 mt-8 border border-blue-200">
-                <p className="text-sm text-gray-600 font-medium mb-3">KẾT QUẢ CỦA BẠN</p>
+                <p className="text-sm text-gray-600 font-medium mb-3">KẾT QUẢ CỦA NHÓM BẠN</p>
                 <div className={cn(
                   "text-6xl font-black mb-3 text-balance",
                   user.score >= 5 ? "bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
@@ -416,7 +416,7 @@ export default function QuizPage() {
                 className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
-                Xem hồ sơ học sinh
+                Xem hồ sơ hóm của bạn
               </Button>
             </div>
           </Card>
@@ -430,6 +430,7 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4">
+      <MusicPlayer name="Ontap" loop />
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
@@ -437,7 +438,7 @@ export default function QuizPage() {
             <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Trắc Nghiệm Chuyên Đề</h1>
           </div>
           <div className="flex items-center justify-center gap-4 text-gray-700">
-            <span>👤 <span className="font-semibold text-blue-600">{user.name}</span></span>
+            <span>👤 <span className="font-semibold text-blue-600">Nhóm {user.group}</span></span>
             <span className="text-gray-400">•</span>
             <span>📚 <span className="font-semibold text-blue-600">Lớp {user.class}</span></span>
           </div>
@@ -469,7 +470,7 @@ export default function QuizPage() {
             <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
             <h2 className="text-4xl font-bold text-gray-800 mb-2">Kết quả của bạn</h2>
             <p className="text-lg text-gray-600 mb-8">
-              {user.name} • Lớp {user.class}
+              Nhóm {user.group} • Lớp {user.class}
             </p>
             <div className="mb-8 p-8 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
               <div className={cn(

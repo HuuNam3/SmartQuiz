@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { useUser, UserType } from '@/context/user-context'
 import MusicPlayer from '@/components/MusicPlayer'
 import { toast } from "sonner"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,14 +20,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
@@ -34,15 +27,8 @@ const QUIZ_ACCESS_CODE = 'OT123456'
 
 export default function Home() {
   const [classId, setClassId] = useState('')
-  const [group, setGroup] = useState('')
   const [showQuizWarning, setShowQuizWarning] = useState(false)
   const [showCompletedWarning, setShowCompletedWarning] = useState(false)
-  const [showVerifyDialog, setShowVerifyDialog] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [editClassId, setEditClassId] = useState('')
-  const [editGroup, setEditGroup] = useState('')
-  const [pendingUser, setPendingUser] = useState<UserType | null>(null)
-  const [, setVerifyMode] = useState<'login' | 'profile'>('login')
   const [showAccessCodeDialog, setShowAccessCodeDialog] = useState(false)
   const [accessCode, setAccessCode] = useState('')
   const [accessError, setAccessError] = useState('')
@@ -54,41 +40,6 @@ export default function Home() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleEditInfo = async () => {
-    if (!editGroup) {
-      toast.warning('vui lòng chọn nhóm!')
-      return
-    }
-
-    try {
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: editClassId,
-          group: editGroup,
-        }),
-      });
-
-      setUser({
-        ...user!,
-        classId: editClassId,
-        group: editGroup
-      })
-
-
-      setShowVerifyDialog(false)
-      setIsEditMode(false)
-      toast.success('cập nhật thông tin thành công!')
-      fetchUsers()
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      toast.error('cập nhật thông tin thất bại!')
-    }
-  }
-
   const getScore = (score?: number) => {
     if (score === undefined || score === -1) return ''
     return score
@@ -96,13 +47,13 @@ export default function Home() {
 
   const exportToExcel = () => {
     if (users.length === 0) {
-      alert('Chưa có học sinh nào làm bài!')
+      alert('Chưa có nhóm nào làm bài!')
       return
     }
 
     const data = users
       .filter((user) => !user.admin) // bỏ admin
-      .sort((a, b) => a.stt - b.stt) // sort từ nhỏ đến lớn theo stt
+      .sort((a, b) => a.group - b.group) // sort từ nhỏ đến lớn theo stt
       .map((record) => {
         const start = record.startTime
           ? new Date(record.startTime)
@@ -124,10 +75,8 @@ export default function Home() {
 
 
         return {
-          STT: record.stt,
-          'Họ và tên': record.name,
-          'Lớp': record.class,
           'Nhóm': record.group,
+          'Lớp': record.class,
           'Điểm trạm 1': getScore(record?.scoreStep?.[0]),
           'Điểm trạm 2': getScore(record?.scoreStep?.[1]),
           'Điểm trạm 3': getScore(record?.scoreStep?.[2]),
@@ -174,81 +123,27 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!group) {
-      toast.warning('vui lòng chọn nhóm!')
-      return
-    }
-
     // chuẩn hóa input
     const normalizedClassId = classId.trim().toLowerCase()
-
-    const findUserGroup = users.find(
-      (u) =>
-        u.classId?.trim().toLowerCase() === normalizedClassId &&
-        u.group
-    )
-
-    clearUser()
 
     const findUser = users.find(
       (u) =>
         u.classId?.trim().toLowerCase() === normalizedClassId
     )
 
-    if (!findUserGroup) {
-      if (!findUser) {
-        toast.error('mã học sinh chưa đúng!')
-        return
-      }
+    clearUser()
 
-      const userToVerify = {
-        ...findUser,
-        group
-      }
-
-      setPendingUser(userToVerify)
-      setEditClassId(userToVerify.classId)
-      setEditGroup(userToVerify.group)
-      setVerifyMode('login')
-      setShowVerifyDialog(true)
-
-    } else {
-      setPendingUser(findUserGroup)
-      setEditClassId(findUserGroup.classId)
-      setEditGroup(findUserGroup.group || '')
-      setVerifyMode('login')
-      setShowVerifyDialog(true)
+    if (!findUser) {
+      toast.error('Mã nhóm chưa đúng!')
+      return
     }
-  }
 
-  const handleConfirmVerify = async () => {
-    if (!pendingUser) return
-
-    try {
-      await fetch(`/api/users`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          classId: pendingUser.classId,
-          group: pendingUser.group,
-        }),
-      });
-
-      setUser(pendingUser)
-      setShowVerifyDialog(false)
-      setIsEditMode(false)
-      setPendingUser(null)
-      toast.success('xác nhận thông tin thành công!')
-      fetchUsers()
-      if (classId !== 'admin333') {
-        router.push('/review')
-      }
-    } catch (error) {
-      console.error("Failed to verify profile:", error);
-      toast.error('xác nhận thông tin thất bại!')
+    toast.success('xác nhận mã nhóm thành công!')
+    if (classId !== 'admin333') {
+      router.push('/review')
     }
+    fetchUsers()
+    setUser(findUser)
   }
 
   const handleQuizClick = () => {
@@ -418,127 +313,18 @@ export default function Home() {
         </AlertDialog>
       )}
 
-      {showVerifyDialog && (
-        <AlertDialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl text-blue-600">
-                {isEditMode ? 'Sửa thông tin học sinh' : 'Xác nhận thông tin học sinh'}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="sr-only">
-                {isEditMode ? 'Sửa thông tin của bạn' : 'Xác nhận lại thông tin học sinh'}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <div className="space-y-4">
-              {!isEditMode ? (
-                <>
-                  {pendingUser?.name && (
-                    <div className="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
-                      <p className="text-sm text-gray-600 mb-1">Tên học sinh:</p>
-                      <p className="font-semibold text-gray-800 text-lg">{pendingUser.name}</p>
-                    </div>
-                  )}
-                  {pendingUser?.class && (
-                    <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-                      <p className="text-sm text-gray-600 mb-1">Lớp:</p>
-                      <p className="font-semibold text-gray-800 text-lg">{pendingUser.class}</p>
-                    </div>
-                  )}
-                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                    <p className="text-sm text-gray-600 mb-1">Mã học sinh:</p>
-                    <p className="font-semibold text-gray-800 text-lg">{editClassId}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                    <p className="text-sm text-gray-600 mb-1">Nhóm:</p>
-                    <p className="font-semibold text-gray-800 text-lg">{editGroup}</p>
-                  </div>
-                  <p className="text-sm text-gray-700 text-center mt-4 font-medium">Thông tin của bạn đã chính xác chưa?</p>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mã Học Sinh
-                    </label>
-                    <Input
-                      type="text"
-                      value={editClassId}
-                      onChange={() => { }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nhóm
-                    </label>
-                    <Select
-                      value={editGroup}
-                      onValueChange={(value) => setEditGroup(value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn nhóm của bạn" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Nhóm 1">Nhóm 1</SelectItem>
-                        <SelectItem value="Nhóm 2">Nhóm 2</SelectItem>
-                        <SelectItem value="Nhóm 3">Nhóm 3</SelectItem>
-                        <SelectItem value="Nhóm 4">Nhóm 4</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <AlertDialogFooter>
-              {!isEditMode ? (
-                <>
-                  <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
-                  <Button
-                    onClick={() => setIsEditMode(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
-                  >
-                    Sửa thông tin
-                  </Button>
-                  <AlertDialogAction onClick={handleConfirmVerify} className="bg-green-600 hover:bg-green-700">
-                    Xác nhận
-                  </AlertDialogAction>
-                </>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => setIsEditMode(false)}
-                    variant="outline"
-                  >
-                    Quay lại
-                  </Button>
-                  <Button
-                    onClick={handleEditInfo}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Lưu thay đổi
-                  </Button>
-                </>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-
       {showCompletedWarning && (
         <AlertDialog open={showCompletedWarning} onOpenChange={setShowCompletedWarning}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl text-red-600">Bạn đã hoàn thành bài trắc nghiệm!</AlertDialogTitle>
+              <AlertDialogTitle className="text-xl text-red-600">Nhóm bạn đã hoàn thành bài trắc nghiệm!</AlertDialogTitle>
               <AlertDialogDescription className="sr-only">
                 Thông báo về việc đã hoàn thành bài trắc nghiệm
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="text-base space-y-2 text-muted-foreground">
-              <span className="block text-gray-700">Mỗi học sinh chỉ được làm bài trắc nghiệm <strong>1 lần</strong>.</span>
-              <span className="block text-gray-600">Bạn đã hoàn thành bài làm của mình. Vui lòng xem kết quả trong phần Hồ sơ học sinh.</span>
+              <span className="block text-gray-700">Mỗi nhóm chỉ được làm bài trắc nghiệm <strong>1 lần</strong>.</span>
+              <span className="block text-gray-600">Nhóm bạn đã hoàn thành bài làm của mình. Vui lòng xem kết quả trong phần Hồ sơ nhóm học sinh.</span>
             </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Đóng</AlertDialogCancel>
@@ -568,45 +354,22 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Thông tin học sinh</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Thông tin nhóm của học sinh</h2>
               </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Mã Học Sinh
+                    Mã đại diện nhóm Học Sinh
                   </label>
                   <Input
                     id="classId"
                     type="text"
-                    placeholder="Nhập mã của bạn"
+                    placeholder="Nhập mã nhóm của bạn"
                     value={classId}
                     onChange={(e) => setClassId(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
-                </div>
-
-                <div>
-                  <label htmlFor="className" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nhóm
-                  </label>
-                  <Select
-                    value={group}
-                    onValueChange={(value) => setGroup(value)}
-                    required
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn nhóm của bạn" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      <SelectItem value="Nhóm 1">Nhóm 1</SelectItem>
-                      <SelectItem value="Nhóm 2">Nhóm 2</SelectItem>
-                      <SelectItem value="Nhóm 3">Nhóm 3</SelectItem>
-                      <SelectItem value="Nhóm 4">Nhóm 4</SelectItem>
-                    </SelectContent>
-                  </Select>
-
                 </div>
 
                 <Button
@@ -641,35 +404,24 @@ export default function Home() {
                 </h2>
               </div>
 
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span className="text-gray-600">Mã học sinh:</span>
-                  <span className="font-semibold text-gray-800 ml-auto">{user.classId}</span>
+              {!user.admin
+                ? <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="text-gray-600">Nhóm:</span>
+                    <span className="font-semibold text-gray-800 ml-auto">{user.group}</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span className="text-gray-600">Lớp:</span>
+                    <span className="font-semibold text-gray-800 ml-auto">{user.class}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-100">
-                  <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <span className="text-gray-600">Nhóm:</span>
-                  <span className="font-semibold text-gray-800 ml-auto">{user.group}</span>
-                </div>
-              </div>
-
-              {/* <Button
-                onClick={handleOpenVerifyDialog}
-                className="w-full bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl mb-4"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Xác nhận lại thông tin
-              </Button> */}
-
-              {user.admin && (
-                <div className="space-y-4 mb-6">
+                : <div className="space-y-4 mb-6">
                   <div className="p-4 bg-linear-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
                     <div className="flex items-center gap-2 mb-2">
                       <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -677,7 +429,7 @@ export default function Home() {
                       </svg>
                       <p className="text-amber-800 font-semibold">Chế độ Quản trị viên</p>
                     </div>
-                    <p className="text-amber-700 text-sm">Số học sinh đã làm bài: <strong className="text-lg">{users.filter(
+                    <p className="text-amber-700 text-sm">Số nhóm đã làm bài: <strong className="text-lg">{users.filter(
                       (u) => !u.admin && u.endTime !== undefined
                     ).length}</strong></p>
                   </div>
@@ -691,7 +443,7 @@ export default function Home() {
                     Xuất file Excel (xlsx)
                   </Button>
                 </div>
-              )}
+              }
 
               <Button
                 onClick={clearUser}
@@ -759,8 +511,8 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Hồ sơ Học sinh</h3>
-                    <p className="text-gray-600 mb-4 text-sm">Xem và quản lý thông tin hồ sơ cá nhân, kết quả học tập và các thành tích của bạn.</p>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">Hồ sơ nhóm của Học sinh</h3>
+                    <p className="text-gray-600 mb-4 text-sm">Xem và quản lý thông tin hồ sơ của nhóm, kết quả học tập và các thành tích của nhóm bạn.</p>
                     <p className={`text-sm font-semibold flex items-center gap-2 ${user ? 'text-purple-600' : 'text-gray-500'}`}>
                       {user ? (
                         <>

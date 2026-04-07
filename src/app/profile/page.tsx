@@ -42,25 +42,13 @@ export default function ProfilePage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Hồ sơ Học sinh
+            Hồ sơ của nhóm
           </h1>
         </div>
 
         {/* Student Info Card */}
         <Card className="p-8 shadow-xl bg-white/80 backdrop-blur-sm border-0 mb-6">
           <div className="space-y-6">
-            {/* Name */}
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-blue-50 to-cyan-50 border border-blue-100">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-blue-600 mb-1">Họ và tên</p>
-                <p className="text-xl font-bold text-gray-800">{user.name}</p>
-              </div>
-            </div>
 
             {/* Class */}
             <div className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-100">

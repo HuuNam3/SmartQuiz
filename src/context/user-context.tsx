@@ -4,13 +4,11 @@ import { createContext, useContext, useState, ReactNode, useCallback } from 'rea
 
 export type UserType = {
   classId: string
-  name: string
   class: string
-  stt: number
   admin?: boolean
-  group?: string
+  group: number
   score: number
-  timeStep?: Number
+  timeStep?: number
   continueStep?: number
   scoreStep?: number[]
   startTime?: number

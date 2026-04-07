@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useUser } from '@/context/user-context'
@@ -87,16 +86,6 @@ export default function ReviewPage() {
   const router = useRouter()
   const { user } = useUser()
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/')
-    }
-  }, [user, router])
-
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-yellow-50 pt-24 pb-12 px-4">
       <MusicPlayer name="Nen" loop={true} />
@@ -108,21 +97,6 @@ export default function ReviewPage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold bg-linear-to-r from-red-700 via-rose-600 to-amber-500 bg-clip-text text-transparent mb-4">Ôn tập kiến thức</h1>
-          <div className="inline-flex items-center gap-4 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm border border-red-100">
-            <span className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="font-semibold text-red-700">{user?.name}</span>
-            </span>
-            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span className="font-semibold text-amber-700">{user?.class}</span>
-            </span>
-          </div>
           <p className="text-sm text-gray-500 mt-4">
             Đọc kỹ các nội dung bên dưới trước khi làm bài trắc nghiệm
           </p>
@@ -232,15 +206,6 @@ export default function ReviewPage() {
                           </li>
                         </ul>
                       </div>
-
-                      {/* <div className="bg-red-50 p-4 rounded-xl shadow mb-4">
-                        <h4 className="font-semibold text-lg mb-2">🛡️ Nghĩa vụ</h4>
-                        <ul className="list-disc ml-5 text-gray-700 space-y-1">
-                          <li>Bảo vệ tài nguyên và môi trường</li>
-                          <li>Tuân thủ quy định pháp luật</li>
-                          <li>Đăng ký và xin phép khi khai thác tài nguyên</li>
-                        </ul>
-                      </div> */}
 
                       <div className="bg-yellow-50 p-4 rounded-xl shadow mt-6">
                         <h4 className="font-semibold text-lg mb-2">💬 Thông điệp</h4>
@@ -718,15 +683,16 @@ export default function ReviewPage() {
           </ul>
         </Card>
 
-        <div className="mt-8 flex justify-center">
-          <Button
-            size="lg"
-            className="px-8 py-6 text-lg font-semibold bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
-            onClick={() => router.push('/consolidation')}
-          >
-            Bắt đầu Hải Trình Kì Bí
-          </Button>
-        </div>
+        {user &&
+          <div className="mt-8 flex justify-center">
+            <Button
+              size="lg"
+              className="px-8 py-6 text-lg font-semibold bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-lg"
+              onClick={() => router.push('/consolidation')}
+            >
+              Bắt đầu Hải Trình Kì Bí
+            </Button>
+          </div>}
       </div>
     </div>
   )
