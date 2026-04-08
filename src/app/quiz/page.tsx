@@ -203,6 +203,7 @@ export default function QuizPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    if (!user?.score) return
     if (user?.endTime && user?.score >= 5 && canvasRef.current) {
       const canvas = canvasRef.current
       const ctx = canvas.getContext('2d')
@@ -333,12 +334,12 @@ export default function QuizPage() {
 
   const answeredCount = answers.filter(a => a !== null).length
   const unansweredCount = quizzes.length - answeredCount
-
+  if (!user?.score) return
   // Nếu đã hoàn thành bài trắc nghiệm, hiển thị thông báo
   if (user.endTime) {
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4 flex items-center justify-center relative overflow-hidden">
-        {user.score >= 5 && (
+        {user?.score >= 5 && (
           <canvas
             ref={canvasRef}
             className="fixed inset-0 pointer-events-none"

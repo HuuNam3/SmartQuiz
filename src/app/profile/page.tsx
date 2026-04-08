@@ -32,13 +32,14 @@ export default function ProfilePage() {
   }
 
   const totalScore = (): number => {
+    const score = user.score || 0
     let total = 0
     user.scoreStep?.forEach(idx => {
       if (idx >= 4) {
         total++
       }
     })
-    return total + user.score
+    return total + score
   }
 
   return (

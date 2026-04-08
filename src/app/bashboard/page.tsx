@@ -8,7 +8,7 @@ import { useUser } from '@/context/user-context'
 
 export default function Dashboard() {
   const router = useRouter()
-  const { fetchUsers, users, user } = useUser()
+  const { user } = useUser()
 
   useEffect(() => {
     if (!user || !(user?.classId === 'admin333') && user.admin) {

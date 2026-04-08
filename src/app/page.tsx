@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,6 @@ import {
 // import { saveAs } from 'file-saver'
 
 const QUIZ_ACCESS_CODE = 'OT123456'
-const ADMIN = 'admin333'
 
 export default function Home() {
   const [classId, setClassId] = useState('')
@@ -58,21 +57,6 @@ export default function Home() {
 
     return () => clearInterval(interval)
   }, [user])
-
-  const getScore = (score?: number) => {
-    if (score === undefined || score === -1) return ''
-    return score
-  }
-
-  const totalScore = (userScore: UserType): number => {
-    let total = 0
-    userScore.scoreStep?.forEach(idx => {
-      if (idx >= 4) {
-        total++
-      }
-    })
-    return total + userScore.score
-  }
 
   // const exportToExcel = () => {
   //   if (users.length === 0) {
