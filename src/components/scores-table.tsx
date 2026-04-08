@@ -700,7 +700,7 @@ export function ScoresTable() {
       ${colors.border}
     `}
                       >
-                        {totalScore(row)}
+                        {totalScore(row)} Điểm
                       </span>
                     </TableCell>
 
@@ -762,7 +762,7 @@ export function ScoresTable() {
                             </p>
 
                             <p className="text-3xl font-bold text-primary">
-                              {totalScore(row)}
+                              {totalScore(row)} Điểm
                             </p>
                           </div>
                         </div>
