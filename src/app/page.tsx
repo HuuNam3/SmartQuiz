@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,10 +20,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-import * as XLSX from 'xlsx'
-import { saveAs } from 'file-saver'
+// import * as XLSX from 'xlsx'
+// import { saveAs } from 'file-saver'
 
 const QUIZ_ACCESS_CODE = 'OT123456'
+const ADMIN = 'admin333'
 
 export default function Home() {
   const [classId, setClassId] = useState('')
@@ -36,7 +37,12 @@ export default function Home() {
   const { fetchUsers, user, users, clearUser, setUser } = useUser()
 
   useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
+
+  useEffect(() => {
     if (!user) return
+    if(user.admin) return
     const interval = setInterval(() => {
       fetch(`/api/users`, {
         method: "PUT",
@@ -48,7 +54,7 @@ export default function Home() {
           ping: true,
         }),
       })
-    }, 30 * 1000)
+    }, 5 * 1000)
 
     return () => clearInterval(interval)
   }, [user])
@@ -68,81 +74,81 @@ export default function Home() {
     return total + userScore.score
   }
 
-  const exportToExcel = () => {
-    if (users.length === 0) {
-      alert('Chưa có nhóm nào làm bài!')
-      return
-    }
+  // const exportToExcel = () => {
+  //   if (users.length === 0) {
+  //     alert('Chưa có nhóm nào làm bài!')
+  //     return
+  //   }
 
-    const data = users
-      .filter((user) => !user.admin) // bỏ admin
-      .sort((a, b) => a.group - b.group) // sort từ nhỏ đến lớn theo stt
-      .map((record) => {
-        const start = record.startTime
-          ? new Date(record.startTime)
-          : null
+  //   const data = users
+  //     .filter((user) => !user.admin) // bỏ admin
+  //     .sort((a, b) => a.group - b.group) // sort từ nhỏ đến lớn theo stt
+  //     .map((record) => {
+  //       const start = record.startTime
+  //         ? new Date(record.startTime)
+  //         : null
 
-        const end = record.endTime
-          ? new Date(record.endTime)
-          : null
+  //       const end = record.endTime
+  //         ? new Date(record.endTime)
+  //         : null
 
-        let duration = ''
+  //       let duration = ''
 
-        if (record.startTime && record.endTime) {
-          const diffMs = record.endTime - record.startTime
-          const minutes = Math.floor(diffMs / 60000)
-          const seconds = Math.floor((diffMs % 60000) / 1000)
+  //       if (record.startTime && record.endTime) {
+  //         const diffMs = record.endTime - record.startTime
+  //         const minutes = Math.floor(diffMs / 60000)
+  //         const seconds = Math.floor((diffMs % 60000) / 1000)
 
-          duration = `${minutes} phút ${seconds} giây`
-        }
+  //         duration = `${minutes} phút ${seconds} giây`
+  //       }
 
 
-        return {
-          'Nhóm': record.group,
-          'Lớp': record.class,
-          'Điểm trạm 1': getScore(record?.scoreStep?.[0]),
-          'Điểm trạm 2': getScore(record?.scoreStep?.[1]),
-          'Điểm trạm 3': getScore(record?.scoreStep?.[2]),
-          'Điểm trạm 4': getScore(record?.scoreStep?.[3]),
-          'Điểm ôn tập': record.score,
-          'Tổng điểm': totalScore(record),
+  //       return {
+  //         'Nhóm': record.group,
+  //         'Lớp': record.class,
+  //         'Điểm trạm 1': getScore(record?.scoreStep?.[0]),
+  //         'Điểm trạm 2': getScore(record?.scoreStep?.[1]),
+  //         'Điểm trạm 3': getScore(record?.scoreStep?.[2]),
+  //         'Điểm trạm 4': getScore(record?.scoreStep?.[3]),
+  //         'Điểm ôn tập': record.score,
+  //         'Tổng điểm': totalScore(record),
 
-          'Ngày làm bài': start
-            ? start.toLocaleDateString('vi-VN')
-            : '',
+  //         'Ngày làm bài': start
+  //           ? start.toLocaleDateString('vi-VN')
+  //           : '',
 
-          'Thời gian bắt đầu': start
-            ? start.toLocaleTimeString('vi-VN')
-            : '',
+  //         'Thời gian bắt đầu': start
+  //           ? start.toLocaleTimeString('vi-VN')
+  //           : '',
 
-          'Thời gian kết thúc': end
-            ? end.toLocaleTimeString('vi-VN')
-            : '',
+  //         'Thời gian kết thúc': end
+  //           ? end.toLocaleTimeString('vi-VN')
+  //           : '',
 
-          'Thời gian làm bài': duration,
-        }
-      })
+  //         'Thời gian làm bài': duration,
+  //       }
+  //     })
 
-    const worksheet = XLSX.utils.json_to_sheet(data)
+  //   const worksheet = XLSX.utils.json_to_sheet(data)
 
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQua')
+  //   const workbook = XLSX.utils.book_new()
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQua')
 
-    const fileName = `ket_qua_trac_nghiem_${new Date()
-      .toLocaleDateString('vi-VN')
-      .replace(/\//g, '-')}.xlsx`
+  //   const fileName = `ket_qua_trac_nghiem_${new Date()
+  //     .toLocaleDateString('vi-VN')
+  //     .replace(/\//g, '-')}.xlsx`
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    })
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: 'xlsx',
+  //     type: 'array',
+  //   })
 
-    const blob = new Blob([excelBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    })
+  //   const blob = new Blob([excelBuffer], {
+  //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //   })
 
-    saveAs(blob, fileName)
-  }
+  //   saveAs(blob, fileName)
+  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -164,7 +170,7 @@ export default function Home() {
 
     if (findUser?.ping && !findUser?.admin) {
       const now = Date.now()
-      const isOnline = (now - Number(new Date(findUser.ping))) < 60 * 1000
+      const isOnline = (now - Number(new Date(findUser.ping))) < 30 * 1000
       console.log(isOnline)
       if (isOnline) {
         toast.error('Mã đã được sử dụng ở nơi khác!')
@@ -186,6 +192,8 @@ export default function Home() {
     toast.success('xác nhận mã nhóm thành công!')
     if (classId !== 'admin333') {
       router.push('/review')
+    } else {
+      router.push('/bashboard')
     }
     setUser(findUser)
   }
@@ -256,6 +264,24 @@ export default function Home() {
       console.error("Failed to save profile:", error)
     }
   }
+
+  // const renderButton = ():ReactNode => {
+  //   if(ADMIN === user.classId) {
+  //     return (
+  //       <Button
+  //         onClick={exportToExcel}
+  //         className="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+  //       >
+  //         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  //           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  //         </svg>
+  //         Xuất file Excel (xlsx)
+  //       </Button>
+  //     )
+  //   } else {
+  //     return ''
+  //   }
+  // }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
@@ -445,7 +471,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {user.admin ? 'Quản trị viên' : 'Xin chào!'}
+                  {user.admin ? 'Giáo viên' : 'Xin chào!'}
                   <MusicPlayer name="Nen" loop />
                 </h2>
               </div>
@@ -473,21 +499,10 @@ export default function Home() {
                       <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
-                      <p className="text-amber-800 font-semibold">Chế độ Quản trị viên</p>
+                      <p className="text-amber-800 font-semibold">Chế độ Giáo viên</p>
                     </div>
-                    <p className="text-amber-700 text-sm">Số nhóm đã làm bài: <strong className="text-lg">{users.filter(
-                      (u) => !u.admin && u.endTime !== undefined
-                    ).length}</strong></p>
+                    <p className="text-amber-700 text-sm"><strong className="text-lg">Bạn có thể làm mọi thứ như học sinh nhưng nó sẽ không lưu lại</strong></p>
                   </div>
-                  <Button
-                    onClick={exportToExcel}
-                    className="w-full bg-linear-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Xuất file Excel (xlsx)
-                  </Button>
                 </div>
               }
 

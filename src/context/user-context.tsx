@@ -7,7 +7,7 @@ export type UserType = {
   class: string
   admin?: boolean
   group: number
-  score: number
+  score?: number
   ping: number
   timeStep?: number
   continueStep?: number

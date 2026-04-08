@@ -304,8 +304,6 @@ export default function ConsolidationPage() {
   }, [currentStation, currentQuestion, answers, question?.id, question?.type])
 
   useEffect(() => {
-    if (!user) return
-
     const failed: Record<number, boolean> = {}
     const submitted: Record<number, boolean> = {}
     const unlocked: number[] = []
@@ -329,7 +327,7 @@ export default function ConsolidationPage() {
     setScores(scoreSteps)
 
     // Nếu có continueStep -> làm tiếp trạm đó
-    if (user.continueStep !== undefined && user.continueStep !== null && user.continueStep !== -1) {
+    if (user?.continueStep !== undefined && user?.continueStep !== null && user?.continueStep !== -1) {
       const step = Number(user.continueStep)
 
       setCurrentStation(step)
@@ -351,7 +349,7 @@ export default function ConsolidationPage() {
         if (remaining > 0) {
           setTimeLeft(Math.floor(remaining / 1000))
         } else {
-          setTimeLeft(0)
+          setTimeLeft(1000)
         }
       }
     }
@@ -360,7 +358,7 @@ export default function ConsolidationPage() {
     setFailedStations(failed)
     setSubmittedStations(submitted)
 
-  }, [user])
+  }, [])
 
   useEffect(() => {
     if (user?.timeStep || (!selectedStation && selectedStation !== 0)) return
@@ -601,6 +599,7 @@ export default function ConsolidationPage() {
       ...prev,
       [currentStation]: true,
     }))
+    console.log('chaysetselected')
     setSelectedStation(null)
     setTimeLeft(STATION_DURATION / 1000)
   }
