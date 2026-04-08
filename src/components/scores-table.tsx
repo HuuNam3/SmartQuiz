@@ -15,8 +15,6 @@ import {
   ChevronDown,
   Download,
   Users,
-  Calendar,
-  Clock,
   TrendingUp,
   Award,
   BookOpen,
