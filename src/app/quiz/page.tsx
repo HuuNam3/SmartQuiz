@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { CheckCircle2, Clock, BookOpen, ChevronLeft, ChevronRight, Send, Trophy, Zap, Brain, Star, Flame, Target } from 'lucide-react'
+import { CheckCircle2, Clock, BookOpen, ChevronLeft, ChevronRight, Send, Trophy, Brain } from 'lucide-react'
 import MusicPlayer from '@/components/MusicPlayer'
 
 // Ngân hàng 10 câu hỏi
@@ -94,7 +94,6 @@ const allQuestions = [
 ]
 
 const QUIZ_COUNT = 6
-const MAX_SCORE = 6
 const QUIZ_DURATION = 6 * 60 * 1000// 6 phút tính bằng giây
 
 // Fisher-Yates shuffle algorithm
@@ -334,100 +333,6 @@ export default function QuizPage() {
 
   const answeredCount = answers.filter(a => a !== null).length
   const unansweredCount = quizzes.length - answeredCount
-  if (!user?.score) return
-  // Nếu đã hoàn thành bài trắc nghiệm, hiển thị thông báo
-  if (user.endTime) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12 px-4 flex items-center justify-center relative overflow-hidden">
-        {user?.score >= 5 && (
-          <canvas
-            ref={canvasRef}
-            className="fixed inset-0 pointer-events-none"
-            style={{ zIndex: 10 }}
-          />
-        )}
-        <MusicPlayer name="Ontap" loop />
-        <div className="max-w-2xl mx-auto w-full relative z-20">
-          <Card className="p-8 text-center shadow-lg border-0 relative overflow-hidden bg-white">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-linear-to-bl from-purple-100 to-transparent rounded-full blur-3xl opacity-50"></div>
-            <div className="relative z-10">
-              <div className="mb-6">
-                {user.score >= 5 ? (
-                  <div className="animate-bounce">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
-                      <Star className="w-12 h-12 text-white animate-spin" />
-                    </div>
-                  </div>
-                ) : user.score >= 3 ? (
-                  <div className="animate-pulse">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg">
-                      <Target className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-linear-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
-                      <Trophy className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <h2 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                Hoàn thành bài trắc nghiệm!
-              </h2>
-              {user.score >= 5 && (
-                <p className="text-lg font-bold text-yellow-600 mb-2">Xuất sắc! 🎉</p>
-              )}
-              <p className="text-gray-500 text-sm">Mỗi nhóm chỉ được làm bài 1 lần</p>
-
-              <div className="p-8 bg-linear-to-br from-blue-50 to-purple-50 rounded-xl mb-6 mt-8 border border-blue-200">
-                <p className="text-sm text-gray-600 font-medium mb-3">KẾT QUẢ CỦA NHÓM BẠN</p>
-                <div className={cn(
-                  "text-6xl font-black mb-3 text-balance",
-                  user.score >= 5 ? "bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent" :
-                    user.score >= 3 ? "bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent" :
-                      "bg-linear-to-r from-gray-500 to-gray-600 bg-clip-text text-transparent"
-                )}>
-                  {user.score}/{MAX_SCORE}
-                </div>
-                <div className={cn(
-                  "inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold",
-                  user.score >= 5 ? "bg-yellow-100 text-yellow-700" :
-                    user.score >= 3 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"
-                )}>
-                  {user.score >= 5 ? (
-                    <>
-                      <Flame className="w-4 h-4" />
-                      Xuất sắc!
-                    </>
-                  ) : user.score >= 3 ? (
-                    <>
-                      <Target className="w-4 h-4" />
-                      Khá tốt!
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4" />
-                      Cố gắng lên!
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <Button
-                onClick={handleGoToProfile}
-                className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                Xem hồ sơ hóm của bạn
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    )
-  }
 
   const score = calculateScore()
   const scorePercentage = (score / quizzes.length) * 100

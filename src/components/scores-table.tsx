@@ -127,6 +127,20 @@ export function ScoresTable() {
     )
   }
 
+  function cellStyle() {
+    return `
+    border
+    border-slate-200
+    dark:border-slate-700
+    bg-white
+    dark:bg-slate-900
+    rounded-xl
+    px-3
+    py-3
+    transition-all
+    duration-200
+  `
+  }
 
   function getStationResult(score?: number) {
     if (score === undefined || score === -1) return ''
@@ -157,7 +171,7 @@ export function ScoresTable() {
       if (s >= 4) total++
     })
 
-    return total + score
+    return Number(total + score)
   }
 
   function calculateRanks(users: UserType[]) {
@@ -357,17 +371,43 @@ export function ScoresTable() {
       </div>
 
       <div className="overflow-x-auto">
-        <Table className="text-base">
+        <Table className="
+    text-base
+    border-separate
+    border-spacing-y-2
+    border-spacing-x-2
+  ">
           <TableHeader>
             <TableRow>
               <TableHead />
-
-              <TableHead>
+              <TableHead
+                className="
+    border
+    border-slate-200
+    dark:border-slate-700
+    bg-slate-100
+    dark:bg-slate-800
+    rounded-xl
+    text-center
+    font-bold
+  "
+              >
                 <Users className="h-4 w-4 inline mr-2" />
                 Nhóm
               </TableHead>
 
-              <TableHead>Lớp</TableHead>
+              <TableHead
+                className="
+    border
+    border-slate-200
+    dark:border-slate-700
+    bg-slate-100
+    dark:bg-slate-800
+    rounded-xl
+    text-center
+    font-bold
+  "
+              >Lớp</TableHead>
 
               {stationConfig.map((s, i) => {
                 const Icon = s.icon
@@ -425,17 +465,15 @@ export function ScoresTable() {
                     key={id}
                     layout
                     transition={{
-                      type: 'spring',
-                      stiffness: 95,
-                      damping: 18,
-                      mass: 1.4,
+                      duration: 1.5,
+                      ease: 'linear',
                     }}
                     className="
-    cursor-pointer
-    transition-all
-    duration-300
-    hover:scale-[1.01]
-  "
+                      cursor-pointer
+                      transition-all
+                      duration-300
+                      hover:scale-[1.01]
+                      "
                     onClick={() =>
                       setExpandedRow(
                         expandedRow === id
@@ -478,14 +516,10 @@ export function ScoresTable() {
 
                     <TableCell
                       className={`
+    ${cellStyle()}
     text-center
     text-sm
     font-bold
-    py-3
-    px-2
-    rounded-lg
-    transition-all
-    duration-300
     ${stationConfig[0].bg}
     ${activeCheckpoint === 0
                           ? `${colors.bg} ${colors.border} ${colors.glow} animate-station-active`
@@ -521,31 +555,36 @@ export function ScoresTable() {
                     </TableCell>
 
                     <TableCell
-                      className={`text-center text-sm font-bold py-3 px-2 rounded-lg transition-all duration-300 
-                      ${stationConfig[1].bg}
-                      ${activeCheckpoint === 1
+                      className={`
+    ${cellStyle()}
+    text-center
+    text-sm
+    font-bold
+    ${stationConfig[1].bg}
+    ${activeCheckpoint === 1
                           ? `${colors.bg} ${colors.border} ${colors.glow} animate-station-active`
                           : ''
-                        }`}
+                        }
+  `}
                     >
                       {activeCheckpoint === 1 ? (
                         <div className="flex items-center gap-1">
                           <Loader2
                             className={`
-      h-4 w-4
-      animate-spin
-      ${colors.text}
-    `}
+                            h-4 w-4
+                            animate-spin
+                            ${colors.text}
+                          `}
                           />
 
                           <span
                             className={`
-      text-xs
-      font-semibold
-      uppercase
-      tracking-wide
-      ${colors.text}
-    `}
+                                text-xs
+                                font-semibold
+                                uppercase
+                                tracking-wide
+                                ${colors.text}
+                              `}
                           >
                             Đang làm
                           </span>
@@ -556,26 +595,36 @@ export function ScoresTable() {
                     </TableCell>
 
                     <TableCell
-                      className={`text-center text-sm font-bold py-3 px-2 rounded-lg transition-all duration-300 ${stationConfig[2].bg}
-                      ${activeCheckpoint === 2
+                      className={`
+    ${cellStyle()}
+    text-center
+    text-sm
+    font-bold
+    ${stationConfig[2].bg}
+    ${activeCheckpoint === 2
                           ? `${colors.bg} ${colors.border} ${colors.glow} animate-station-active`
                           : ''
-                        }`}
+                        }
+  `}
                     >
                       {activeCheckpoint === 2 ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <span
+                        <div className="flex items-center gap-1">
+                          <Loader2
                             className={`
-                            text-xs
-                            font-bold
-                            tracking-wider
-                            px-2
-                            py-1
-                            rounded-full
-                            bg-white
-                            shadow-sm
+                            h-4 w-4
+                            animate-spin
                             ${colors.text}
                           `}
+                          />
+
+                          <span
+                            className={`
+                                text-xs
+                                font-semibold
+                                uppercase
+                                tracking-wide
+                                ${colors.text}
+                              `}
                           >
                             Đang làm
                           </span>
@@ -586,12 +635,17 @@ export function ScoresTable() {
                     </TableCell>
 
                     <TableCell
-                      className={`text-center text-sm font-bold py-3 px-2 rounded-lg transition-all duration-300 
-                      ${stationConfig[3].bg}
-                      ${activeCheckpoint === 3
+                      className={`
+    ${cellStyle()}
+    text-center
+    text-sm
+    font-bold
+    ${stationConfig[3].bg}
+    ${activeCheckpoint === 3
                           ? `${colors.bg} ${colors.border} ${colors.glow} animate-station-active`
                           : ''
-                        }`}
+                        }
+  `}
                     >
                       {activeCheckpoint === 3 ? (
                         <div className="flex items-center gap-1">
@@ -620,22 +674,31 @@ export function ScoresTable() {
                       )}
                     </TableCell>
 
-                    <TableCell className="text-center">
+                    <TableCell
+                      className={`
+    ${cellStyle()}
+    text-center
+    text-sm
+    font-bold
+    ${stationConfig[0].bg}
+  `}
+                    >
                       {row.score}
                     </TableCell>
 
-                    <TableCell className="text-center">
+                    <TableCell >
                       <span
-                        className="
-      text-lg
-      font-bold
-      px-3
-      py-1
+                        className={`
+      px-6
+      py-4
       rounded-lg
-      bg-primary
+      font-bold
+      text-xl
       text-white
-      shadow-md
-    "
+      ${colors.badge}
+      border
+      ${colors.border}
+    `}
                       >
                         {totalScore(row)}
                       </span>
