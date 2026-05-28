@@ -1,23 +1,23 @@
 # Smart Quiz
 
-Ứng dụng ôn tập và kiểm tra kiến thức về chủ quyền biển đảo Việt Nam, xây dựng bằng Next.js App Router, React 19 và MongoDB.
+An interactive review and quiz application about Vietnam's maritime sovereignty, built with Next.js App Router, React 19, and MongoDB.
 
-Hệ thống có 2 luồng sử dụng chính:
+The system has two main user flows:
 
-- Học sinh đăng nhập bằng `classId`, đọc phần ôn tập, làm 4 trạm củng cố và bài quiz 6 câu.
-- Giáo viên đăng nhập bằng mã demo để xem bảng điểm tổng hợp và xuất Excel.
+- Students sign in with a `classId`, study the review materials, complete 4 reinforcement stations, and take a 6-question quiz.
+- Teachers sign in with a demo code to view the scoreboard and export results to Excel.
 
-## Tính năng chính
+## Main Features
 
-- Đăng nhập theo mã đại diện nhóm học sinh.
-- Trang ôn tập kiến thức có hình ảnh, accordion và âm thanh.
-- Phần `Hải Trình Kỳ Bí` gồm 4 trạm, mỗi trạm 5 câu, có chấm điểm và khóa/mở theo mã.
-- Bài quiz chính gồm 6 câu ngẫu nhiên từ ngân hàng 10 câu, giới hạn 6 phút.
-- Hồ sơ nhóm hiển thị điểm quiz, điểm từng trạm và tổng điểm.
-- Dashboard giáo viên theo dõi tiến độ làm bài theo thời gian thực và xuất Excel.
-- Dữ liệu lưu trên MongoDB qua API routes trong `src/app/api`.
+- Sign in with a student group code.
+- Review page with images, accordion sections, and audio playback.
+- `Mystery Voyage` reinforcement mode with 4 stations, 5 questions per station, scoring, and station unlock codes.
+- Main quiz with 6 random questions selected from a 10-question bank, limited to 6 minutes.
+- Student profile page showing quiz score, station scores, and total score.
+- Teacher dashboard with near real-time progress tracking and Excel export.
+- Data stored in MongoDB through API routes in `src/app/api`.
 
-## Công nghệ sử dụng
+## Tech Stack
 
 - Next.js `16.2.1`
 - React `19.2.4`
@@ -25,42 +25,42 @@ Hệ thống có 2 luồng sử dụng chính:
 - Tailwind CSS `v4`
 - MongoDB Node Driver
 - shadcn/ui, Radix UI, Sonner, Framer Motion
-- `xlsx` và `file-saver` để xuất Excel
+- `xlsx` and `file-saver` for Excel export
 
-## Luồng sử dụng
+## User Flow
 
-### Học sinh
+### Student
 
-1. Vào trang chủ và nhập `classId`.
-2. Đọc phần ôn tập tại `/review`.
-3. Làm 4 trạm tại `/consolidation`.
-4. Mở bài quiz bằng mã truy cập `OT123456`.
-5. Xem kết quả tại `/profile`.
+1. Open the home page and enter a `classId`.
+2. Read the review materials at `/review`.
+3. Complete the 4 stations at `/consolidation`.
+4. Unlock the main quiz with access code `OT123456`.
+5. View the result at `/profile`.
 
-### Giáo viên
+### Teacher
 
-- Mã demo giáo viên: `gv001`
-- Sau khi đăng nhập bằng mã này, hệ thống chuyển tới `/bashboard`
-- Giáo viên có thể xem bảng điểm và xuất file Excel
+- Teacher demo code: `gv001`
+- After signing in with this code, the app redirects to `/bashboard`
+- Teachers can view the scoreboard and export an Excel file
 
-## Yêu cầu môi trường
+## Environment Variables
 
-Tạo file `.env.local`:
+Create a `.env.local` file:
 
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017
 MONGODB_DB=smart_quiz
 ```
 
-Ứng dụng sẽ báo lỗi ngay khi khởi động nếu thiếu 2 biến môi trường trên.
+The app will fail on startup if either of these variables is missing.
 
-## Dữ liệu MongoDB tối thiểu để demo
+## Minimum MongoDB Seed Data For Demo
 
-Ứng dụng không tự tạo dữ liệu mẫu. Để demo được, bạn cần có ít nhất:
+The application does not generate sample data automatically. To run a demo, you should prepare at least the following data.
 
-### Collection `users`
+### `users` Collection
 
-Ví dụ bản ghi giáo viên:
+Example teacher record:
 
 ```json
 {
@@ -73,7 +73,7 @@ Ví dụ bản ghi giáo viên:
 }
 ```
 
-Ví dụ bản ghi học sinh:
+Example student record:
 
 ```json
 {
@@ -89,9 +89,9 @@ Ví dụ bản ghi học sinh:
 }
 ```
 
-### Collection `codes`
+### `codes` Collection
 
-Mỗi trạm cần một mã mở khóa chưa dùng:
+Each station needs one unused unlock code:
 
 ```json
 [
@@ -102,20 +102,20 @@ Mỗi trạm cần một mã mở khóa chưa dùng:
 ]
 ```
 
-Lưu ý:
+Notes:
 
-- Mã vào bài quiz chính đang hardcode là `OT123456`.
-- Mã mở khóa từng trạm được đọc từ collection `codes`.
-- Mã giáo viên demo đã được chuẩn hóa là `gv001`.
+- The main quiz access code is currently hardcoded as `OT123456`.
+- Station unlock codes are loaded from the `codes` collection.
+- The teacher demo code has been standardized to `gv001`.
 
-## Cài đặt và chạy
+## Install and Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Mở [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
@@ -126,7 +126,7 @@ npm run start
 npm run lint
 ```
 
-## Cấu trúc thư mục chính
+## Main Project Structure
 
 ```text
 src/
@@ -146,16 +146,16 @@ src/
 public/
 ```
 
-## API hiện có
+## Existing API Endpoints
 
-- `GET /api/users`: lấy toàn bộ người dùng
-- `POST /api/users`: thêm người dùng mới
-- `PUT /api/users`: cập nhật `ping`, điểm quiz, điểm trạm, trạng thái làm tiếp
-- `GET /api/codes`: lấy danh sách mã mở khóa trạm
-- `PUT /api/codes`: đánh dấu mã đã dùng
+- `GET /api/users`: fetch all users
+- `POST /api/users`: create a new user
+- `PUT /api/users`: update `ping`, quiz score, station scores, or continuation state
+- `GET /api/codes`: fetch station unlock codes
+- `PUT /api/codes`: mark a code as used
 
-## Ghi chú triển khai
+## Implementation Notes
 
-- Dự án dùng App Router trong `src/app`.
-- `next.config.ts` đang cho phép dev origin từ `localhost`, `192.168.1.34`, `192.168.1.96`.
-- Dashboard giáo viên nằm ở route `/bashboard` theo đúng tên thư mục hiện tại.
+- The project uses App Router under `src/app`.
+- `next.config.ts` currently allows dev origins from `localhost`, `192.168.1.34`, and `192.168.1.96`.
+- The teacher dashboard route is `/bashboard`, matching the current folder name.
