@@ -24,6 +24,7 @@ import {
 // import { saveAs } from 'file-saver'
 
 const QUIZ_ACCESS_CODE = 'OT123456'
+const TEACHER_DEMO_CODE = 'gv001'
 
 export default function Home() {
   const [classId, setClassId] = useState('')
@@ -174,7 +175,7 @@ export default function Home() {
     }
 
     toast.success('xác nhận mã nhóm thành công!')
-    if (classId !== 'admin333') {
+    if (findUser.classId !== TEACHER_DEMO_CODE) {
       router.push('/review')
     } else {
       router.push('/bashboard')

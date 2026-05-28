@@ -9,9 +9,10 @@ import { useUser } from '@/context/user-context'
 export default function Dashboard() {
   const router = useRouter()
   const { user } = useUser()
+  const TEACHER_DEMO_CODE = 'gv001'
 
   useEffect(() => {
-    if (!user || !(user?.classId === 'admin333') && user.admin) {
+    if (!user || !user.admin || user.classId !== TEACHER_DEMO_CODE) {
       router.push('/')
     }
 
